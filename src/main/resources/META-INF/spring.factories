@@ -1,0 +1,1 @@
+org.springframework.boot.env.EnvironmentPostProcessor=ink.markidea.note.context.config.ContextPropertyLoader

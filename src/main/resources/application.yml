@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    driver-class-name: org.sqlite.JDBC
+    url: jdbc:sqlite:${dbDir}/markidea.db
+  jpa:
+    database-platform: ink.markidea.note.db.sqlite.SQLiteDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+  resources:
+    static-locations: classpath:/static, file:${staticDir}, file:${frontDir}
+  servlet:
+    multipart:
+      max-file-size: 10MB
+
+register-forbidden: true
+server:
+  port: 8090
