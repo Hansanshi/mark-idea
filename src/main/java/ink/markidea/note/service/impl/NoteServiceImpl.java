@@ -9,6 +9,7 @@ import ink.markidea.note.entity.vo.NoteVersionVo;
 import ink.markidea.note.entity.vo.NoteVo;
 import ink.markidea.note.service.IFileService;
 import ink.markidea.note.service.INoteService;
+import ink.markidea.note.util.DateTimeUtil;
 import ink.markidea.note.util.GitUtil;
 import ink.markidea.note.util.ThreadLocalUtil;
 import lombok.NonNull;
@@ -22,9 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author hansanshi
@@ -79,17 +79,19 @@ public class NoteServiceImpl implements INoteService {
         if (childFiles == null || childFiles.length == 0 ){
             return ServerResponse.buildSuccessResponse(Collections.emptyList());
         }
-        List<String> noteList = new ArrayList<>();
-        for (File file : childFiles){
-            if (file.isDirectory()){
-                continue;
-            }
-            if (checkExtension(file.getName())){
-                noteList.add(file.getName().substring(0,file.getName().lastIndexOf(".")));
-            }
-        }
-        List<NoteVo> noteVoList = new ArrayList<>(noteList.size());
-        noteList.forEach( note -> noteVoList.add(new NoteVo().setTitle(note)));
+        // sort by lastModifiedTime and convert
+        Arrays.sort(childFiles, (f1, f2) -> (int) (
+                f2.lastModified() - f1.lastModified()));
+        List<NoteVo> noteVoList = Arrays.stream(childFiles).
+                filter(file -> !file.isDirectory())
+                .filter(file -> checkExtension(file.getName()))
+                .map(file -> {
+                    String title = file.getName().substring(0,file.getName().lastIndexOf("."));
+                    String lastModifiedDate = DateTimeUtil.dateToStr(new Date(file.lastModified()));
+                    String previewContent = fileService.getPreviewLines(file);
+                    return new NoteVo().setTitle(title).setLastModifiedTime(lastModifiedDate).setPreviewContent(previewContent);
+                })
+                .collect(Collectors.toList());
         return ServerResponse.buildSuccessResponse(noteVoList);
     }
 

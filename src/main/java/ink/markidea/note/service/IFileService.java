@@ -3,6 +3,7 @@ package ink.markidea.note.service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.List;
 
 
 /**
@@ -20,6 +21,8 @@ public interface IFileService {
     boolean writeStringToFile(String content, File targetFile);
 
     String getContentFromFile(File file);
+
+    String getPreviewLines(File file);
 
     void deleteFile(File file);
 }

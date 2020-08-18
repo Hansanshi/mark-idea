@@ -46,7 +46,7 @@ public class ContextPropertyLoader implements EnvironmentPostProcessor, Ordered 
     }
 
     private void addPathAndInitDir(Map<String,Object> map, String basePath){
-        map.put("basedir",basePath);
+        map.put("baseDir",basePath);
 
         // dir store sqlite database
         File dbDir = new File(basePath, "db");

@@ -1,9 +1,12 @@
 package ink.markidea.note.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -14,68 +17,86 @@ import java.util.zip.ZipInputStream;
 @Slf4j
 public class FileUtil {
 
+    public static List<String> readLines(File file, int size) {
+        try (FileReader fileReader = new FileReader(file);
+            BufferedReader bufferedReader = new BufferedReader(fileReader)) {
+            List<String> result = new ArrayList<>();
+            String line;
+            while ((line = bufferedReader.readLine()) != null && size > 0) {
+                if (StringUtils.isBlank(line)){
+                    continue;
+                }
+                result.add(line);
+                size --;
+            }
+            return result;
+        } catch (IOException e) {
+            log.error("readLine", e);
+            return null;
+        }
+    }
 
-    public static String readFileAsString(File file){
-        try( FileInputStream inputStream = new FileInputStream(file)) {
+    public static String readFileAsString(File file) {
+        try (FileInputStream inputStream = new FileInputStream(file)) {
             byte[] bytes = new byte[inputStream.available()];
             inputStream.read(bytes);
             return new String(bytes);
         } catch (IOException e) {
-            log.error("read file:{} failed, cause is", file.getAbsolutePath(),e);
+            log.error("read file:{} failed, cause is", file.getAbsolutePath(), e);
             return null;
         }
     }
 
 
-    public static boolean writeStringToFile(String content, File targetFile){
-        try(Writer writer = new FileWriter(targetFile);
-            BufferedWriter bufferedWriter = new BufferedWriter(writer)) {
+    public static boolean writeStringToFile(String content, File targetFile) {
+        try (Writer writer = new FileWriter(targetFile);
+             BufferedWriter bufferedWriter = new BufferedWriter(writer)) {
             bufferedWriter.write(content);
             bufferedWriter.flush();
             return true;
         } catch (IOException e) {
-            log.error("write to file:{} failed, cause is", targetFile.getAbsolutePath(),e);
+            log.error("write to file:{} failed, cause is", targetFile.getAbsolutePath(), e);
             return false;
         }
     }
 
 
-    public static void deleteFileOrDirectory(File file){
-        if (!file.exists()){
-            return ;
+    public static void deleteFileOrDirectory(File file) {
+        if (!file.exists()) {
+            return;
         }
-        if (file.isFile()){
+        if (file.isFile()) {
             file.delete();
-            return ;
+            return;
         }
         File[] childFiles = file.listFiles();
-        if (childFiles != null){
-            for (File childFile : childFiles){
+        if (childFiles != null) {
+            for (File childFile : childFiles) {
                 deleteFileOrDirectory(childFile);
             }
         }
         file.delete();
     }
 
-    public static void copyDirectory(File srcDir, File targetDir){
-        if (!srcDir.exists()){
+    public static void copyDirectory(File srcDir, File targetDir) {
+        if (!srcDir.exists()) {
             throw new IllegalStateException("srcDir doesn't exist");
         }
-        if (!targetDir.exists()){
+        if (!targetDir.exists()) {
             targetDir.mkdir();
         }
-        if (srcDir.isFile() || targetDir.isFile()){
+        if (srcDir.isFile() || targetDir.isFile()) {
             throw new IllegalArgumentException("Only directory");
         }
 
         File[] childFileList = srcDir.listFiles();
-        if (childFileList == null || childFileList.length == 0){
-            return ;
+        if (childFileList == null || childFileList.length == 0) {
+            return;
         }
-        for (File childFile : childFileList){
-            if (childFile.isDirectory()){
+        for (File childFile : childFileList) {
+            if (childFile.isDirectory()) {
                 copyDirectory(childFile, new File(targetDir, childFile.getName()));
-                continue ;
+                continue;
             }
             copyFile(childFile, new File(targetDir, childFile.getName()));
         }
@@ -90,14 +111,13 @@ public class FileUtil {
     }
 
 
-
-    public static void unzip(InputStream fileInputStream, String destPath){
+    public static void unzip(InputStream fileInputStream, String destPath) {
         ZipInputStream zipInputStream = new ZipInputStream(fileInputStream);
 
-        try{
+        try {
             ZipEntry entry = null;
-            while ((entry = zipInputStream.getNextEntry()) != null){
-                if (entry.isDirectory()){
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                if (entry.isDirectory()) {
                     new File(destPath, entry.getName()).mkdir();
                     zipInputStream.closeEntry();
                     continue;
@@ -105,15 +125,15 @@ public class FileUtil {
                 FileOutputStream out = new FileOutputStream(new File(destPath, entry.getName()));
                 byte[] buffer = new byte[1024];
                 int len = -1;
-                while ((len = zipInputStream.read(buffer)) != -1){
-                    out.write(buffer, 0 , len);
+                while ((len = zipInputStream.read(buffer)) != -1) {
+                    out.write(buffer, 0, len);
                 }
                 out.close();
                 zipInputStream.closeEntry();
             }
             zipInputStream.close();
             fileInputStream.close();
-        }catch (Exception e){
+        } catch (Exception e) {
             // do nothing
         }
 

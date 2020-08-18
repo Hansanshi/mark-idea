@@ -21,10 +21,10 @@ public class HttpRequestInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)  {
         String username = request.getHeader("username");
-if (StringUtils.isBlank(username)){
+        if (StringUtils.isBlank(username)){
 
-}
-ThreadLocalUtil.setUsername(username);
+        }
+        ThreadLocalUtil.setUsername(username);
         // TODO log params
         //  log.info("request header: {} \n param: {}", request.get);
         return true;

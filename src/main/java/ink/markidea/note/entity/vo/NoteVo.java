@@ -22,4 +22,8 @@ public class NoteVo {
     private int status =  STATUS_PRIVATE;
 
     private String content;
+
+    private String previewContent;
+
+    private String lastModifiedTime;
 }
