@@ -64,7 +64,10 @@ public class LocalFileServiceImpl implements IFileService {
     public String getPreviewLines(File file) {
         StringBuilder builder = new StringBuilder();
         FileUtil.readLines(file, 2).forEach(line -> builder.append("\n").append(line));
-        return builder.substring(1);
+        if (builder.length() >= 1){
+            return builder.substring(1);
+        }
+        return null;
     }
 
     @Override

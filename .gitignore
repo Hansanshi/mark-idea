@@ -29,3 +29,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### markidea ###
+src/main/resources/front.zip
