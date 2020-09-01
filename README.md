@@ -36,7 +36,7 @@ MarkIdea基于Git来管理笔记的历史版本，想必大家也比较熟悉这
 
 运行环境仅需要安装jdk8，请根据自己系统安装对应jdk8并配置好环境，在此不再赘述。
 
-下载后，在该目录下进入命令行，运行下面一行命令
+下载[软件](https://gitee.com/hansanshi/mark-idea/attach_files/468797/download)后，在该目录下进入命令行，运行下面一行命令
 
 ```bash
 # 后台运行MarkIdea
