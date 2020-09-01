@@ -28,7 +28,7 @@ public class ContextPropertyLoader implements EnvironmentPostProcessor, Ordered 
 
         Map<String,Object> map = new HashMap<>();
 
-        boolean devSwitch = false;
+        boolean devSwitch = true;
         String path ;
         if (devSwitch){
             path = home.getDir().getAbsolutePath();
