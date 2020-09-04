@@ -8,7 +8,7 @@ MarkIdea本身是一个Java程序，所以它可以部署多种平台上，包�
 
 MarkIdea基于Git来管理笔记的历史版本，想必大家也比较熟悉这个版本管理工具，同时MarkIdea也支持推送至远程Git仓库备份，提高笔记的安全性。
 
-目前该项目处于初期阶段，如有bug，欢迎反馈。
+目前该项目处于初期阶段，如有bug，欢迎反馈。提供[demo网站](http://sanshicloud.cn:8090)，用户名和密码均为admin，仅供尝试，服务器带宽较小。
 
 ## 功能介绍
 
@@ -99,7 +99,7 @@ nohup java -jar note-<version>.jar --username=<your_username> --password=<your_p
 1. 因为MarkDown编辑器采用的是[vditor](https://hacpai.com/article/1549638745630)，实现了CommonMark规范，故无意义的空白换行均会被自动吞掉，如果你一定需要换行，请使用工具栏的强制换行按钮。
 2. 出于实现复杂度的考虑，笔记一旦被重命名或移动至其他笔记本，那么你无法再看见该笔记之前的本历史版本，但你仍然可以通过其他git工具查看到历史。
 3. 同理，被清理的笔记仍然可以通过其他git工具查看到，尽管MarkIdea上看不到了。
-4. 笔记名和笔记本名
+4. 笔记名和笔记本名需要符合文件系统的要求。
 
 
 
