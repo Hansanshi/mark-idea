@@ -46,4 +46,9 @@ public class AdminController {
     public ServerResponse startPushToRemote(){
         return adminService.startPushToRemoteRepo();
     }
+
+    @PostMapping("pull")
+    public ServerResponse pullFromRemote(){
+        return adminService.pullFromRemote();
+    }
 }

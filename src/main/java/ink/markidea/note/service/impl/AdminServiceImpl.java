@@ -2,14 +2,20 @@ package ink.markidea.note.service.impl;
 
 import ink.markidea.note.context.task.NoteTimer;
 import ink.markidea.note.dao.UserRepository;
+import ink.markidea.note.entity.exception.PromptException;
 import ink.markidea.note.entity.resp.ServerResponse;
 import ink.markidea.note.service.IAdminService;
+import ink.markidea.note.util.GitUtil;
 import ink.markidea.note.util.SshUtil;
 import ink.markidea.note.util.ThreadLocalUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
 
 /**
  * @author hansanshi
@@ -18,6 +24,9 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class AdminServiceImpl implements IAdminService {
+
+    @Value("${notesDir}")
+    private String notesDir;
 
     @Autowired
     private NoteTimer noteTimer;
@@ -62,12 +71,38 @@ public class AdminServiceImpl implements IAdminService {
     public ServerResponse startPushToRemoteRepo() {
         userRepository.save(userRepository.findByUsername(getUsername()).setPush(true));
         noteTimer.refreshPushTaskList();
-        return ServerResponse.buildSuccessResponse();    }
+        return ServerResponse.buildSuccessResponse();
+    }
 
     @Override
     public ServerResponse getRemoteRepoUrl() {
         String remoteRepoUrl = userRepository.findByUsername(getUsername()).getRemoteRepository();
         return ServerResponse.buildSuccessResponse(remoteRepoUrl);
+    }
+
+    @Override
+    public ServerResponse pullFromRemote() {
+        Git git = getOrCreateUserGit();
+        try {
+            String prvKeyPath = new File(sshKeysDir, getUsername() + ".prv").getAbsolutePath();
+            GitUtil.pullFromRemote(git, prvKeyPath);
+        } catch (GitAPIException e) {
+            throw new PromptException("拉取远程仓库失败");
+        }
+        return ServerResponse.buildSuccessResponse();
+    }
+
+    private File getOrCreateUserNotebookDir(){
+        File dir = new File(notesDir, getUsername());
+        if (dir.exists()){
+            return dir;
+        }
+        dir.mkdir();
+        return dir;
+    }
+
+    private Git getOrCreateUserGit(){
+        return GitUtil.getOrInitGit(getOrCreateUserNotebookDir());
     }
 
     private String getUsername(){

@@ -97,7 +97,16 @@ public class GitUtil {
 
         Set<String> skippedRefs = new HashSet<>();
         for (RevCommit revCommit : revCommitList) {
-            CommitMessage message = JsonUtil.stringToObj(revCommit.getFullMessage(), CommitMessage.class);
+            CommitMessage message ;
+            try{
+                message = JsonUtil.stringToObj(revCommit.getFullMessage(), CommitMessage.class);
+            }catch (Exception e){
+                // do nothing
+                continue;
+            }
+            if (message == null){
+                continue;
+            }
             if (message.getChangeType() == null) {
                 continue;
             }
@@ -212,6 +221,15 @@ public class GitUtil {
     public static void pushToRemoteViaSsh(Git git, String privateKeyPath) throws GitAPIException {
         SshSessionFactory sshSessionFactory = new MyJshConfigSessionFactory(privateKeyPath);
         git.push().setTransportConfigCallback(transport -> {
+            SshTransport sshTransport = (SshTransport) transport;
+            sshTransport.setSshSessionFactory(sshSessionFactory);
+        }).call();
+    }
+
+    public static void pullFromRemote(Git git, String privateKeyPath) throws GitAPIException {
+        SshSessionFactory sshSessionFactory = new MyJshConfigSessionFactory(privateKeyPath);
+
+        git.pull().setTransportConfigCallback(transport -> {
             SshTransport sshTransport = (SshTransport) transport;
             sshTransport.setSshSessionFactory(sshSessionFactory);
         }).call();

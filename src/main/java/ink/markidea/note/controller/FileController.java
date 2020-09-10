@@ -10,12 +10,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author hansanshi
@@ -37,6 +35,11 @@ public class FileController {
     }
 
 
+    /**
+     * vditor上传文件定制接口
+     * @param request
+     * @return
+     */
     @PostMapping("vditor")
     public VditorFileUploadResponse upload(StandardMultipartHttpServletRequest request){
         List<MultipartFile> files = request.getMultiFileMap().get("file[]");

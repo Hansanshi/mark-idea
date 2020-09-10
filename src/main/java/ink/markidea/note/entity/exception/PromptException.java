@@ -5,4 +5,7 @@ package ink.markidea.note.entity.exception;
  * @date 2020/2/9
  */
 public class PromptException extends RuntimeException {
+    public PromptException(String message) {
+        super(message);
+    }
 }

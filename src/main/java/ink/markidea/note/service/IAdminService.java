@@ -22,4 +22,6 @@ public interface IAdminService {
     ServerResponse startPushToRemoteRepo();
 
     ServerResponse getRemoteRepoUrl();
+
+    ServerResponse pullFromRemote();
 }

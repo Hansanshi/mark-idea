@@ -1,5 +1,7 @@
-package ink.markidea.note.entity.exception;
+package ink.markidea.note.context.interceptor;
 
+import ink.markidea.note.entity.exception.NoAuthorityException;
+import ink.markidea.note.entity.exception.PromptException;
 import ink.markidea.note.entity.resp.ServerResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
