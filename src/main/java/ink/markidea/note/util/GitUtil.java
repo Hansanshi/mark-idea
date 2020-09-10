@@ -98,16 +98,8 @@ public class GitUtil {
         Set<String> skippedRefs = new HashSet<>();
         for (RevCommit revCommit : revCommitList) {
             CommitMessage message ;
-            try{
-                message = JsonUtil.stringToObj(revCommit.getFullMessage(), CommitMessage.class);
-            }catch (Exception e){
-                // do nothing
-                continue;
-            }
-            if (message == null){
-                continue;
-            }
-            if (message.getChangeType() == null) {
+            message = JsonUtil.stringToObj(revCommit.getFullMessage(), CommitMessage.class);
+            if (message == null || message.getChangeType() == null){
                 continue;
             }
             if (message.getChangeType() == ChangeType.RESET) {
