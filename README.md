@@ -1,4 +1,4 @@
-# MarkIdea
+# 📕 MarkIdea
 
 MarkIdea 是一款开源免费的私有云笔记软件，支持跨平台部署，支持Markdown格式笔记，采用Git进行笔记的版本管理，亦可推送至远程Git仓库备份。
 
@@ -8,9 +8,9 @@ MarkIdea本身是一个Java程序，所以它可以部署多种平台上，包�
 
 MarkIdea基于Git来管理笔记的历史版本，想必大家也比较熟悉这个版本管理工具，同时MarkIdea也支持推送至远程Git仓库备份，提高笔记的安全性。
 
-目前该项目处于初期阶段，如有bug，欢迎反馈。提供[demo网站](http://sanshicloud.cn:8090)，用户名和密码均为admin，仅供尝试，服务器带宽较小。
+目前该项目处于初期阶段，如有bug，欢迎反馈。提供[demo网站](http://sanshicloud.cn:8090)，用户名和密码均为admin，仅供尝试，服务器带宽较小，访问较为缓慢。亦可在[知乎](https://www.zhihu.com/people/hansanshi)私信反馈
 
-## 功能介绍
+## 📮 功能介绍
 
 ### 登录页面
 
@@ -32,7 +32,7 @@ MarkIdea基于Git来管理笔记的历史版本，想必大家也比较熟悉这
 
 目前只在Firefox浏览器和Chrome浏览器上进行过测试。
 
-## 服务器部署
+## 🔩 服务器部署
 
 运行环境仅需要安装jdk8，请根据自己系统安装对应jdk8并配置好环境，在此不再赘述。
 
@@ -49,7 +49,7 @@ nohup java -jar note-<version>.jar --username=<your_username> --password=<your_p
 
 打开浏览器，访问`http://<server_ip>:8090`，即可开始使用，用户名和密码即`<your_username>`和`<your_password>`。
 
-## 参与开发
+## 🖥️ 参与开发
 
 欢迎各位参与本项目的开发中来。
 
@@ -94,12 +94,18 @@ nohup java -jar note-<version>.jar --username=<your_username> --password=<your_p
 
 最后在target目录下，我们就可以拿到打包好的MarkIdea运行文件，`note-<version>.jar`。
 
-## 注意事项
+## ⏰ 注意事项
 
 1. 因为MarkDown编辑器采用的是[vditor](https://hacpai.com/article/1549638745630)，实现了CommonMark规范，故无意义的空白换行均会被自动吞掉，如果你一定需要换行，请使用工具栏的强制换行按钮。
 2. 出于实现复杂度的考虑，笔记一旦被重命名或移动至其他笔记本，那么你无法再看见该笔记之前的本历史版本，但你仍然可以通过其他git工具查看到历史。
 3. 同理，被清理的笔记仍然可以通过其他git工具查看到，尽管MarkIdea上看不到了。
 4. 笔记名和笔记本名需要符合文件系统的要求。
+
+## 🤖 TODO
+1. 公开笔记
+2. 图片管理
+3. 上传图片至图床
+4. 
 
 
 
