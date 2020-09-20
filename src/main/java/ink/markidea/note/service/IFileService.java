@@ -1,9 +1,9 @@
 package ink.markidea.note.service;
 
+import ink.markidea.note.entity.vo.UserFileVo;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.util.List;
 
 
 /**
@@ -25,4 +25,6 @@ public interface IFileService {
     String getPreviewLines(File file);
 
     void deleteFile(File file);
+
+    UserFileVo listUserFiles(int pageIndex, int pageSize);
 }

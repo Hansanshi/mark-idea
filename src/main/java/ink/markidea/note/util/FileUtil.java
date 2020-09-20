@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -16,6 +17,14 @@ import java.util.zip.ZipInputStream;
  */
 @Slf4j
 public class FileUtil {
+
+    public static long KB_LIMIT = 1000;
+
+    public static long MB_LIMIT = 1000 * KB_LIMIT;
+
+    public static long GB_LIMIT = 1000 * MB_LIMIT;
+
+    public static long TB_LIMIT = 1000 * GB_LIMIT;
 
     public static List<String> readLines(File file, int size) {
         try (FileReader fileReader = new FileReader(file);
@@ -139,5 +148,32 @@ public class FileUtil {
 
     }
 
+    /**
+     * 根据文件大小获取字符串
+     * @param file
+     * @return
+     */
+    public static String getFileSizeStr(File file){
+
+        long fileSize = file.length();
+        if (fileSize < KB_LIMIT){
+            return fileSize + "B";
+        }
+
+        if (fileSize < MB_LIMIT){
+            return new DecimalFormat("#.00").format(fileSize/1000.0) + "KB";
+        }
+
+        if (fileSize < GB_LIMIT){
+            return new DecimalFormat("#.00").format(fileSize/1000.0/1000.0) + "MB";
+        }
+
+        if (fileSize < TB_LIMIT){
+            return new DecimalFormat("#.00").format(fileSize/1000.0/1000.0) + "GB";
+
+        }
+        return new DecimalFormat("#.00").format(fileSize/1000.0/1000.0) + "TB";
+
+    }
 
 }

@@ -2,11 +2,10 @@ package ink.markidea.note.controller;
 
 import ink.markidea.note.entity.resp.ServerResponse;
 import ink.markidea.note.entity.resp.VditorFileUploadResponse;
+import ink.markidea.note.entity.vo.UserFileVo;
 import ink.markidea.note.service.IFileService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
@@ -57,6 +56,28 @@ public class FileController {
         response.getData().put("errFiles", errorFileList);
         response.getData().put("succMap", succFileMap);
         return response;
+    }
+
+    /**
+     * 获取用户所有文件列表
+     * @param pageIndex 第几页
+     * @param pageSize 一页多少文件
+     * @return
+     */
+    @GetMapping("")
+    public ServerResponse<UserFileVo> listUserFiles(int pageIndex, int pageSize){
+
+        UserFileVo userFileVo = fileService.listUserFiles(pageIndex, pageSize);
+        return ServerResponse.buildSuccessResponse(userFileVo);
+    }
+
+    /**
+     * 批量删除接口
+     */
+    @PostMapping("batch/delete")
+    public ServerResponse<Void> batchDelete(){
+        // TODO
+        return null;
     }
 
 }
