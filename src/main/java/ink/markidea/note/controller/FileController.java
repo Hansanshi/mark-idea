@@ -1,5 +1,6 @@
 package ink.markidea.note.controller;
 
+import ink.markidea.note.entity.req.BatchFileDeleteRequest;
 import ink.markidea.note.entity.resp.ServerResponse;
 import ink.markidea.note.entity.resp.VditorFileUploadResponse;
 import ink.markidea.note.entity.vo.UserFileVo;
@@ -74,10 +75,10 @@ public class FileController {
     /**
      * 批量删除接口
      */
-    @PostMapping("batch/delete")
-    public ServerResponse<Void> batchDelete(){
-        // TODO
-        return null;
+    @PostMapping("delete/batch")
+    public ServerResponse<Void> batchDelete(@RequestBody BatchFileDeleteRequest request){
+        fileService.batchDelete(request.getFileNames());
+        return ServerResponse.buildSuccessResponse();
     }
 
 }

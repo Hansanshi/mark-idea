@@ -81,6 +81,14 @@ public class LocalFileServiceImpl implements IFileService {
     }
 
     @Override
+    public void batchDelete(List<String> fileNames) {
+        fileNames.forEach(fileName -> {
+            File file = new File(getOrInitUserFileDirectory(), fileName);
+            deleteFile(file);
+        });
+    }
+
+    @Override
     public UserFileVo listUserFiles(int pageIndex, int pageSize) {
 
         File userDir = getOrInitUserFileDirectory();
@@ -102,7 +110,9 @@ public class LocalFileServiceImpl implements IFileService {
 
         for (int i = (pageIndex - 1) * pageSize; i < userFiles.length && i < pageIndex * pageSize; i++) {
             File file = userFiles[i];
-            UserFileVo.FileDetailVo detailVo = new UserFileVo.FileDetailVo().setFileSize(FileUtil.getFileSizeStr(file))
+            UserFileVo.FileDetailVo detailVo = new UserFileVo.FileDetailVo()
+                    .setFileName(file.getName())
+                    .setFileSize(FileUtil.getFileSizeStr(file))
                     .setLastModifiedTime(DateTimeUtil.dateToStr(new Date(file.lastModified())));
             fileDetailVoList.add(detailVo);
         }

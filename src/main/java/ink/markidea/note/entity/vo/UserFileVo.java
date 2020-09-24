@@ -52,6 +52,11 @@ public class UserFileVo {
          * 文件大小
          */
         String fileSize;
+
+        /**
+         * 文件名
+         */
+        String fileName;
     }
 
 }

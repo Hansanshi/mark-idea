@@ -72,11 +72,11 @@ public class FileUtil {
 
     public static void deleteFileOrDirectory(File file) {
         if (!file.exists()) {
-            return;
+            return ;
         }
         if (file.isFile()) {
             file.delete();
-            return;
+            return ;
         }
         File[] childFiles = file.listFiles();
         if (childFiles != null) {
