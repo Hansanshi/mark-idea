@@ -157,22 +157,22 @@ public class FileUtil {
 
         long fileSize = file.length();
         if (fileSize < KB_LIMIT){
-            return fileSize + "B";
+            return fileSize + " B";
         }
 
         if (fileSize < MB_LIMIT){
-            return new DecimalFormat("#.00").format(fileSize/1000.0) + "KB";
+            return new DecimalFormat("#.00").format(fileSize/1000.0) + " KB";
         }
 
         if (fileSize < GB_LIMIT){
-            return new DecimalFormat("#.00").format(fileSize/1000.0/1000.0) + "MB";
+            return new DecimalFormat("#.00").format(fileSize/1000.0/1000.0) + " MB";
         }
 
         if (fileSize < TB_LIMIT){
-            return new DecimalFormat("#.00").format(fileSize/1000.0/1000.0) + "GB";
+            return new DecimalFormat("#.00").format(fileSize/1000.0/1000.0) + " GB";
 
         }
-        return new DecimalFormat("#.00").format(fileSize/1000.0/1000.0) + "TB";
+        return new DecimalFormat("#.00").format(fileSize/1000.0/1000.0) + " TB";
 
     }
 
