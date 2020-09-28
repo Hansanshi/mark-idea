@@ -51,7 +51,7 @@ nohup java -jar note-<version>.jar --username=<your_username> --password=<your_p
 
 ## 🖥️ 参与开发
 
-欢迎各位参与本项目的开发中来。
+欢迎各位参与本项目的开发中来，[联系我]（https://www.zhihu.com/people/hansanshi）。
 
 ###  前端
 
