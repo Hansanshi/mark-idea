@@ -23,6 +23,9 @@ public interface INoteService {
      */
     ServerResponse<List<NoteVo>> listNotes(String notebookName);
 
+
+    ServerResponse<List<NoteVo>> search(String keyWord, List<String> searchNotebooks);
+
     /** create a notebook */
     ServerResponse createNotebook(String notebookName);
 

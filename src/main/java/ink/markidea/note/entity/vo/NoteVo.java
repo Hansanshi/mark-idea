@@ -26,4 +26,6 @@ public class NoteVo {
     private String previewContent;
 
     private String lastModifiedTime;
+
+    private String NotebookName;
 }

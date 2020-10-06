@@ -1,8 +1,10 @@
 package ink.markidea.note.service.impl;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import ink.markidea.note.dao.DelNoteRepository;
 import ink.markidea.note.dao.DraftNoteRepository;
 import ink.markidea.note.entity.DelNoteDo;
+import ink.markidea.note.entity.dto.UserNoteKey;
 import ink.markidea.note.entity.resp.ServerResponse;
 import ink.markidea.note.entity.vo.DeletedNoteVo;
 import ink.markidea.note.entity.vo.NoteVersionVo;
@@ -17,9 +19,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,6 +52,9 @@ public class NoteServiceImpl implements INoteService {
 
     private static final String NOTEBOOK_FLAG_FILE = ".notebook";
 
+    @Autowired
+    @Qualifier("userNoteCache")
+    Cache<UserNoteKey, String> userNoteCache;
 
     @Override
     public ServerResponse<List<String>> listNotebooks(){
@@ -69,33 +76,60 @@ public class NoteServiceImpl implements INoteService {
         return ServerResponse.buildSuccessResponse(notebookNameList);
     }
 
+
+
     @Override
     public ServerResponse<List<NoteVo>> listNotes(String notebookName){
-        File notebookDir = new File(getOrCreateUserNotebookDir(),notebookName);
+        return ServerResponse.buildSuccessResponse(listNotes(notebookName, true));
+    }
+
+    private List<NoteVo> listNotes(String notebookName, boolean loadPreview) {
+        File notebookDir = new File(getOrCreateUserNotebookDir(), notebookName);
         if (!notebookDir.exists() || notebookDir.isFile()){
             throw new RuntimeException("No such notebook");
         }
         File[] childFiles = notebookDir.listFiles();
         if (childFiles == null || childFiles.length == 0 ){
-            return ServerResponse.buildSuccessResponse(Collections.emptyList());
+            return Collections.emptyList();
         }
         // sort by lastModifiedTime and convert
         Arrays.sort(childFiles, (f1, f2) -> (int) (
                 f2.lastModified() - f1.lastModified()));
-        List<NoteVo> noteVoList = Arrays.stream(childFiles).
+        return Arrays.stream(childFiles).
                 filter(file -> !file.isDirectory())
                 .filter(file -> checkExtension(file.getName()))
                 .map(file -> {
                     String title = file.getName().substring(0,file.getName().lastIndexOf("."));
                     String lastModifiedDate = DateTimeUtil.dateToStr(new Date(file.lastModified()));
-                    String previewContent = fileService.getPreviewLines(file);
+                    String previewContent = null;
+                    if (loadPreview){
+                         previewContent = fileService.getPreviewLines(file);
+                    }
                     return new NoteVo().setTitle(title).setLastModifiedTime(lastModifiedDate).setPreviewContent(previewContent);
                 })
                 .collect(Collectors.toList());
-        return ServerResponse.buildSuccessResponse(noteVoList);
     }
 
+    @Override
+    public ServerResponse<List<NoteVo>> search(String keyWord, List<String> searchNotebooks) {
+        List<String> notebookNameList ;
+        if (CollectionUtils.isEmpty(searchNotebooks)){
+            notebookNameList = searchNotebooks;
+        } else {
+            notebookNameList =  listNotebooks().getData();
+        }
+        if (CollectionUtils.isEmpty(notebookNameList)){
+            return ServerResponse.buildSuccessResponse();
+        }
+        List<NoteVo> res = new ArrayList<>();
+        notebookNameList.forEach(notebookName ->
+                listNotes(notebookName, false).stream()
+                .map(noteVo -> noteVo.setContent(userNoteCache.getIfPresent(buildUserNoteKey(notebookName, noteVo.getTitle()))))
+                .filter(noteVo -> StringUtils.isNotBlank(noteVo.getContent()) && noteVo.getContent().contains(keyWord))
+                .forEach(res::add));
+        return ServerResponse.buildSuccessResponse(res);
 
+    }
 
     private void createNotebookIfNecessary(String notebookName){
         File notebookDir = new File(getOrCreateUserNotebookDir(),notebookName);
@@ -155,6 +189,7 @@ public class NoteServiceImpl implements INoteService {
         GitUtil.addAndCommit(getOrCreateUserGit(),relativeFileName);
 
         draftNoteRepository.deleteByUsernameAndNotebookNameAndTitle(getUsername(), notebookName, noteTitle);
+        userNoteCache.put(buildUserNoteKey(notebookName, noteTitle), content);
         return ServerResponse.buildSuccessResponse();
     }
 
@@ -173,6 +208,7 @@ public class NoteServiceImpl implements INoteService {
                                     .setLastRef(lastRef)
                                     .setContent(content)
                                     .setUsername(getUsername()));
+        userNoteCache.invalidate(buildUserNoteKey(notebookName, noteTitle));
         return ServerResponse.buildSuccessResponse();
     }
 
@@ -191,14 +227,9 @@ public class NoteServiceImpl implements INoteService {
 
     @Override
     public ServerResponse<String> getNote(String notebookName, String noteTitle){
-        String relativeFileName = getRelativeFileName(notebookName,noteTitle);
-        File noteFile = new File(getOrCreateUserNotebookDir(), relativeFileName);
-        if (!noteFile.exists()){
-            return ServerResponse.buildErrorResponse("Note not exists");
-        }
-        String content = fileService.getContentFromFile(noteFile);
+        String content = userNoteCache.getIfPresent(buildUserNoteKey(notebookName, noteTitle));
         if (content == null){
-            return ServerResponse.buildErrorResponse("Read note failed");
+            return ServerResponse.buildErrorResponse("读取笔记失败");
         }
         return ServerResponse.buildSuccessResponse(content);
     }
@@ -218,6 +249,7 @@ public class NoteServiceImpl implements INoteService {
         if (!result){
             return ServerResponse.buildErrorResponse("Recover to history version failed");
         }
+        userNoteCache.invalidate(buildUserNoteKey(notebookName, noteTitle));
         return getNote(notebookName, noteTitle);
     }
 
@@ -292,6 +324,8 @@ public class NoteServiceImpl implements INoteService {
         fileService.deleteFile(srcFile);
         fileService.writeStringToFile(content, targetFile);
         GitUtil.mvAndCommit(getOrCreateUserGit(), srcRelativeName, targetRelativeName);
+        userNoteCache.invalidate(buildUserNoteKey(srcNotebook, srcTitle));
+        userNoteCache.put(buildUserNoteKey(targetNotebook, targetTitle), content);
         return ServerResponse.buildSuccessResponse();
     }
 
@@ -337,5 +371,9 @@ public class NoteServiceImpl implements INoteService {
                 || filename.endsWith(".MD")
                 || filename.endsWith(".mD")
                 || filename.endsWith(".Md");
+    }
+
+    private UserNoteKey buildUserNoteKey(String notebookName, String noteTitle){
+        return new UserNoteKey().setNotebookName(notebookName).setNoteTitle(noteTitle).setUsername(getUsername());
     }
 }

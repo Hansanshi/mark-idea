@@ -1,6 +1,7 @@
 package ink.markidea.note.controller;
 
 import ink.markidea.note.entity.req.NoteRequest;
+import ink.markidea.note.entity.req.NoteSearchRequest;
 import ink.markidea.note.entity.resp.ServerResponse;
 import ink.markidea.note.entity.vo.NoteVersionVo;
 import ink.markidea.note.entity.vo.NoteVo;
@@ -43,6 +44,14 @@ public class NoteController {
         return noteService.saveNote(noteTitle, notebookName, request.getContent());
     }
 
+    @PostMapping("/search")
+    public ServerResponse<List<NoteVo>> searchNote(NoteSearchRequest request){
+        if (StringUtils.isBlank(request.getKeyWord())){
+            throw new IllegalArgumentException();
+        }
+        return noteService.search(request.getKeyWord(), request.getSearchNotebookList());
+
+    }
 
     /**
      * get all notebooks, including notes
