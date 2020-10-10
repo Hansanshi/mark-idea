@@ -1,6 +1,6 @@
 package ink.markidea.note.service.impl;
 
-import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import ink.markidea.note.dao.DelNoteRepository;
 import ink.markidea.note.dao.DraftNoteRepository;
 import ink.markidea.note.entity.DelNoteDo;
@@ -54,7 +54,7 @@ public class NoteServiceImpl implements INoteService {
 
     @Autowired
     @Qualifier("userNoteCache")
-    Cache<UserNoteKey, String> userNoteCache;
+    LoadingCache<UserNoteKey, String> userNoteCache;
 
     @Override
     public ServerResponse<List<String>> listNotebooks(){
@@ -105,7 +105,7 @@ public class NoteServiceImpl implements INoteService {
                     if (loadPreview){
                          previewContent = fileService.getPreviewLines(file);
                     }
-                    return new NoteVo().setTitle(title).setLastModifiedTime(lastModifiedDate).setPreviewContent(previewContent);
+                    return new NoteVo().setNotebookName(notebookName).setTitle(title).setLastModifiedTime(lastModifiedDate).setPreviewContent(previewContent);
                 })
                 .collect(Collectors.toList());
     }
@@ -113,7 +113,7 @@ public class NoteServiceImpl implements INoteService {
     @Override
     public ServerResponse<List<NoteVo>> search(String keyWord, List<String> searchNotebooks) {
         List<String> notebookNameList ;
-        if (CollectionUtils.isEmpty(searchNotebooks)){
+        if (!CollectionUtils.isEmpty(searchNotebooks)){
             notebookNameList = searchNotebooks;
         } else {
             notebookNameList =  listNotebooks().getData();
@@ -124,9 +124,12 @@ public class NoteServiceImpl implements INoteService {
         List<NoteVo> res = new ArrayList<>();
         notebookNameList.forEach(notebookName ->
                 listNotes(notebookName, false).stream()
-                .map(noteVo -> noteVo.setContent(userNoteCache.getIfPresent(buildUserNoteKey(notebookName, noteVo.getTitle()))))
-                .filter(noteVo -> StringUtils.isNotBlank(noteVo.getContent()) && noteVo.getContent().contains(keyWord))
+                .map(noteVo -> noteVo.setContent(userNoteCache.get(buildUserNoteKey(notebookName, noteVo.getTitle()))))
+                .filter(noteVo -> StringUtils.isNotBlank(noteVo.getContent()) && (noteVo.getContent().contains(keyWord)
+                        || noteVo.getTitle().contains(keyWord)))
+                .map(noteVo -> noteVo.setSearchCount(subStrCount(noteVo.getContent(), keyWord) + subStrCount(noteVo.getTitle(), keyWord)))
                 .forEach(res::add));
+        res.sort((o1, o2) -> o2.getSearchCount() - o1.getSearchCount());
         return ServerResponse.buildSuccessResponse(res);
 
     }
@@ -375,5 +378,17 @@ public class NoteServiceImpl implements INoteService {
 
     private UserNoteKey buildUserNoteKey(String notebookName, String noteTitle){
         return new UserNoteKey().setNotebookName(notebookName).setNoteTitle(noteTitle).setUsername(getUsername());
+    }
+
+
+    private int subStrCount(String target, String substr){
+      int count = 0;
+      int startIndex = 0;
+      int searchIndex ;
+      while (( searchIndex = target.indexOf(substr, startIndex)) != -1){
+          count ++;
+          startIndex = searchIndex + substr.length();
+        }
+      return count;
     }
 }

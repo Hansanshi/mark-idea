@@ -27,5 +27,7 @@ public class NoteVo {
 
     private String lastModifiedTime;
 
-    private String NotebookName;
+    private String notebookName;
+
+    private int searchCount;
 }

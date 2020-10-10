@@ -2,6 +2,7 @@ package ink.markidea.note.context.config;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import ink.markidea.note.entity.dto.UserNoteKey;
 import ink.markidea.note.entity.vo.UserVo;
 import ink.markidea.note.service.IFileService;
@@ -38,7 +39,7 @@ public class CacheConfig {
     }
 
     @Bean("userNoteCache")
-    public Cache<UserNoteKey, String> userNoteCache(){
+    public LoadingCache<UserNoteKey, String> userNoteCache(){
         return Caffeine.newBuilder()
                 .maximumSize(2000)
 //                .expireAfterAccess(1, TimeUnit.DAYS)

@@ -45,7 +45,7 @@ public class NoteController {
     }
 
     @PostMapping("/search")
-    public ServerResponse<List<NoteVo>> searchNote(NoteSearchRequest request){
+    public ServerResponse<List<NoteVo>> searchNote(@RequestBody NoteSearchRequest request){
         if (StringUtils.isBlank(request.getKeyWord())){
             throw new IllegalArgumentException();
         }
