@@ -8,7 +8,7 @@ MarkIdea本身是一个Java程序，所以它可以部署多种平台上，包�
 
 MarkIdea基于Git来管理笔记的历史版本，想必大家也比较熟悉这个版本管理工具，同时MarkIdea也支持推送至远程Git仓库备份，提高笔记的安全性。
 
-目前该项目处于初期阶段，如有bug，欢迎反馈。提供[demo网站](http://sanshicloud.cn:8090)，用户名和密码均为admin，仅供尝试，服务器带宽较小，访问较为缓慢。亦可在[知乎](https://www.zhihu.com/people/hansanshi)私信反馈
+如有bug，欢迎反馈。如需尝试可访问[demo网站](http://sanshicloud.cn:8090)，用户名和密码均为admin，仅供尝试，服务器带宽较小，访问较为缓慢。亦可在[知乎](https://www.zhihu.com/people/hansanshi)私信反馈
 
 ## 📮 功能介绍
 
@@ -22,21 +22,21 @@ MarkIdea基于Git来管理笔记的历史版本，想必大家也比较熟悉这
 
 ![image-20200901190921203](https://gitee.com/hansanshi/image/raw/master/image-20200901190921203.png)
 
-主页面可以进行创建笔记本、新建笔记、移动笔记和查看笔记历史等操作，点击左上角logo可以关闭或打开笔记侧边栏，右上角菜单可以选择进入设置页面或者注销登录。
+主页面可以进行创建笔记本、新建笔记、移动笔记、搜索笔记和查看笔记历史等操作，点击左上角logo可以关闭或打开笔记侧边栏，右上角菜单可以选择进入设置页面或者注销登录。
 
 ### 设置页面
 
 ![image-20200901191516442](https://gitee.com/hansanshi/image/raw/master/2020-09-27-6.32.42.png)
 
-目前设置功能比较简单，主要是修改密码和设置备份至远程仓库。
+目前设置功能比较简单，主要是文件管理、修改密码和设置备份至远程仓库，后续会开放更多功能。
 
-目前只在Firefox浏览器和Chrome浏览器上进行过测试。
+目前只在Firefox浏览器和Chrome浏览器上进行过测试，其他浏览器效果未知。
 
 ## 🔩 服务器部署
 
 运行环境仅需要安装jdk8，请根据自己系统安装对应jdk8并配置好环境，在此不再赘述。
 
-下载[软件](https://gitee.com/hansanshi/mark-idea/attach_files/485865/download/note-0.2.jar)后，在该目录下进入命令行，运行下面一行命令
+下载[软件](https://gitee.com/hansanshi/mark-idea/attach_files/491125/download/note-0.3.jar)后，在该目录下进入命令行，运行下面一行命令
 
 ```bash
 # 后台运行MarkIdea
@@ -103,9 +103,11 @@ nohup java -jar note-<version>.jar --username=<your_username> --password=<your_p
 
 ## 🍉 更新记录
 2020.09.27 支持文件管理，UI细节调整，升级Vditor版本
+2020.10.10 支持搜索功能
 
 ## 🤖 TODO
-1. 公开笔记
+1. 公开笔记或简单博客
+2. 用户手册
 
 
 
