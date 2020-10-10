@@ -14,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author hansanshi
@@ -63,16 +62,6 @@ public class LocalFileServiceImpl implements IFileService {
     @Override
     public String getContentFromFile(File file){
         return FileUtil.readFileAsString(file);
-    }
-
-    @Override
-    public String getPreviewLines(File file) {
-        StringBuilder builder = new StringBuilder();
-        FileUtil.readLines(file, 2).forEach(line -> builder.append("\n").append(line));
-        if (builder.length() >= 1){
-            return builder.substring(1);
-        }
-        return null;
     }
 
     @Override

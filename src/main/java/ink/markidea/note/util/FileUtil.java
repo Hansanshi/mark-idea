@@ -26,24 +26,6 @@ public class FileUtil {
 
     public static long TB_LIMIT = 1000 * GB_LIMIT;
 
-    public static List<String> readLines(File file, int size) {
-        try (FileReader fileReader = new FileReader(file);
-            BufferedReader bufferedReader = new BufferedReader(fileReader)) {
-            List<String> result = new ArrayList<>();
-            String line;
-            while ((line = bufferedReader.readLine()) != null && size > 0) {
-                if (StringUtils.isBlank(line)){
-                    continue;
-                }
-                result.add(line);
-                size --;
-            }
-            return result;
-        } catch (IOException e) {
-            log.error("readLine", e);
-            return null;
-        }
-    }
 
     public static String readFileAsString(File file) {
         try (FileInputStream inputStream = new FileInputStream(file)) {
@@ -124,7 +106,7 @@ public class FileUtil {
         ZipInputStream zipInputStream = new ZipInputStream(fileInputStream);
 
         try {
-            ZipEntry entry = null;
+            ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
                 if (entry.isDirectory()) {
                     new File(destPath, entry.getName()).mkdir();

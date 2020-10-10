@@ -56,6 +56,11 @@ public class NoteServiceImpl implements INoteService {
     @Qualifier("userNoteCache")
     LoadingCache<UserNoteKey, String> userNoteCache;
 
+
+    @Autowired
+    @Qualifier("userNotePreviewCache")
+    LoadingCache<UserNoteKey, String> userNotePreviewCache;
+
     @Override
     public ServerResponse<List<String>> listNotebooks(){
         File dir = getOrCreateUserNotebookDir();
@@ -103,7 +108,7 @@ public class NoteServiceImpl implements INoteService {
                     String lastModifiedDate = DateTimeUtil.dateToStr(new Date(file.lastModified()));
                     String previewContent = null;
                     if (loadPreview){
-                         previewContent = fileService.getPreviewLines(file);
+                         previewContent = userNotePreviewCache.get(buildUserNoteKey(notebookName, title));
                     }
                     return new NoteVo().setNotebookName(notebookName).setTitle(title).setLastModifiedTime(lastModifiedDate).setPreviewContent(previewContent);
                 })
@@ -123,7 +128,7 @@ public class NoteServiceImpl implements INoteService {
         }
         List<NoteVo> res = new ArrayList<>();
         notebookNameList.forEach(notebookName ->
-                listNotes(notebookName, false).stream()
+                listNotes(notebookName, true).stream()
                 .map(noteVo -> noteVo.setContent(userNoteCache.get(buildUserNoteKey(notebookName, noteVo.getTitle()))))
                 .filter(noteVo -> StringUtils.isNotBlank(noteVo.getContent()) && (noteVo.getContent().contains(keyWord)
                         || noteVo.getTitle().contains(keyWord)))
@@ -192,7 +197,7 @@ public class NoteServiceImpl implements INoteService {
         GitUtil.addAndCommit(getOrCreateUserGit(),relativeFileName);
 
         draftNoteRepository.deleteByUsernameAndNotebookNameAndTitle(getUsername(), notebookName, noteTitle);
-        userNoteCache.put(buildUserNoteKey(notebookName, noteTitle), content);
+        invalidateCache(buildUserNoteKey(notebookName, noteTitle));
         return ServerResponse.buildSuccessResponse();
     }
 
@@ -211,7 +216,7 @@ public class NoteServiceImpl implements INoteService {
                                     .setLastRef(lastRef)
                                     .setContent(content)
                                     .setUsername(getUsername()));
-        userNoteCache.invalidate(buildUserNoteKey(notebookName, noteTitle));
+        invalidateCache(buildUserNoteKey(notebookName, noteTitle));
         return ServerResponse.buildSuccessResponse();
     }
 
@@ -230,7 +235,7 @@ public class NoteServiceImpl implements INoteService {
 
     @Override
     public ServerResponse<String> getNote(String notebookName, String noteTitle){
-        String content = userNoteCache.getIfPresent(buildUserNoteKey(notebookName, noteTitle));
+        String content = userNoteCache.get(buildUserNoteKey(notebookName, noteTitle));
         if (content == null){
             return ServerResponse.buildErrorResponse("读取笔记失败");
         }
@@ -252,7 +257,7 @@ public class NoteServiceImpl implements INoteService {
         if (!result){
             return ServerResponse.buildErrorResponse("Recover to history version failed");
         }
-        userNoteCache.invalidate(buildUserNoteKey(notebookName, noteTitle));
+        invalidateCache(buildUserNoteKey(notebookName, noteTitle));
         return getNote(notebookName, noteTitle);
     }
 
@@ -327,7 +332,7 @@ public class NoteServiceImpl implements INoteService {
         fileService.deleteFile(srcFile);
         fileService.writeStringToFile(content, targetFile);
         GitUtil.mvAndCommit(getOrCreateUserGit(), srcRelativeName, targetRelativeName);
-        userNoteCache.invalidate(buildUserNoteKey(srcNotebook, srcTitle));
+        invalidateCache(buildUserNoteKey(srcNotebook, srcTitle));
         userNoteCache.put(buildUserNoteKey(targetNotebook, targetTitle), content);
         return ServerResponse.buildSuccessResponse();
     }
@@ -390,5 +395,10 @@ public class NoteServiceImpl implements INoteService {
           startIndex = searchIndex + substr.length();
         }
       return count;
+    }
+
+    void invalidateCache(UserNoteKey key){
+        userNotePreviewCache.invalidate(key);
+        userNoteCache.invalidate(key);
     }
 }

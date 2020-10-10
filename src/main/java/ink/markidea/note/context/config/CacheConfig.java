@@ -3,13 +3,14 @@ package ink.markidea.note.context.config;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Weigher;
 import ink.markidea.note.entity.dto.UserNoteKey;
 import ink.markidea.note.entity.vo.UserVo;
 import ink.markidea.note.service.IFileService;
-import ink.markidea.note.util.GitUtil;
-import ink.markidea.note.util.ThreadLocalUtil;
-import org.eclipse.jgit.api.Git;
+import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +28,10 @@ public class CacheConfig {
     @Autowired
     private IFileService fileService;
 
+    @Autowired
+    @Qualifier("userNoteCache")
+    private LoadingCache<UserNoteKey, String> userNoteCache;
+
     @Value("${notesDir}")
     private String notesDir;
 
@@ -41,9 +46,30 @@ public class CacheConfig {
     @Bean("userNoteCache")
     public LoadingCache<UserNoteKey, String> userNoteCache(){
         return Caffeine.newBuilder()
-                .maximumSize(2000)
-//                .expireAfterAccess(1, TimeUnit.DAYS)
+                .maximumWeight(125 * 1024 * 1024)
+                .weigher(new Weigher<UserNoteKey, String>() {
+                    @Override
+                    public @NonNegative int weigh(@NonNull UserNoteKey key, @NonNull String value) {
+                        return value.length();
+                    }
+                })
+                .expireAfterWrite(12, TimeUnit.HOURS)
                 .build(key -> loadNote(key.getUsername(), key.getNotebookName(), key.getNoteTitle()));
+    }
+
+
+    @Bean("userNotePreviewCache")
+    public LoadingCache<UserNoteKey, String> userNotePreviewCache(){
+        return Caffeine.newBuilder()
+                .maximumWeight(10 * 1024 * 1024)
+                .weigher(new Weigher<UserNoteKey, String>() {
+                    @Override
+                    public @NonNegative int weigh(@NonNull UserNoteKey key, @NonNull String value) {
+                        return value.length();
+                    }
+                })
+                .expireAfterWrite(12, TimeUnit.HOURS)
+                .build(this::loadPreview);
     }
 
     private String loadNote(String username, String notebookName, String noteTitle) {
@@ -54,6 +80,14 @@ public class CacheConfig {
         }
         String content = fileService.getContentFromFile(noteFile);
         return content;
+    }
+
+    private String loadPreview(UserNoteKey key){
+        String content = userNoteCache.get(key);
+        if (content == null) {
+            return  null;
+        }
+        return content.substring(0, Math.min(60, content.length()));
     }
 
 

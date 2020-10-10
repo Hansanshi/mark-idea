@@ -23,8 +23,6 @@ public interface IFileService {
 
     String getContentFromFile(File file);
 
-    String getPreviewLines(File file);
-
     void deleteFile(File file);
 
     void batchDelete(List<String> fileNames);
