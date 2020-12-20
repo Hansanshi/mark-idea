@@ -157,7 +157,7 @@ public class GitUtil {
             return true;
         } catch (GitAPIException | JGitInternalException e) {
             log.error("can't move file: {}, cause is: {}", oldFilename, e.getMessage());
-            return false;
+            throw new RuntimeException("can't move");
         }
     }
 
@@ -174,7 +174,7 @@ public class GitUtil {
             return true;
         } catch (GitAPIException | JGitInternalException e) {
             log.error("can't remove file: {}, cause is: {}", fileName, e.getMessage());
-            return false;
+            throw new RuntimeException();
         }
     }
 

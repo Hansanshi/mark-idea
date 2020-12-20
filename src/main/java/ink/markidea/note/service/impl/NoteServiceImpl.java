@@ -4,11 +4,13 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import ink.markidea.note.dao.DelNoteRepository;
 import ink.markidea.note.dao.DraftNoteRepository;
 import ink.markidea.note.entity.DelNoteDo;
+import ink.markidea.note.entity.dto.NotePreviewInfo;
 import ink.markidea.note.entity.dto.UserNoteKey;
 import ink.markidea.note.entity.resp.ServerResponse;
 import ink.markidea.note.entity.vo.DeletedNoteVo;
 import ink.markidea.note.entity.vo.NoteVersionVo;
 import ink.markidea.note.entity.vo.NoteVo;
+import ink.markidea.note.service.IArticleService;
 import ink.markidea.note.service.IFileService;
 import ink.markidea.note.service.INoteService;
 import ink.markidea.note.util.DateTimeUtil;
@@ -59,7 +61,11 @@ public class NoteServiceImpl implements INoteService {
 
     @Autowired
     @Qualifier("userNotePreviewCache")
-    LoadingCache<UserNoteKey, String> userNotePreviewCache;
+    LoadingCache<UserNoteKey, NotePreviewInfo> userNotePreviewCache;
+
+
+    @Autowired
+    private IArticleService articleService;
 
     @Override
     public ServerResponse<List<String>> listNotebooks(){
@@ -85,10 +91,10 @@ public class NoteServiceImpl implements INoteService {
 
     @Override
     public ServerResponse<List<NoteVo>> listNotes(String notebookName){
-        return ServerResponse.buildSuccessResponse(listNotes(notebookName, true));
+        return ServerResponse.buildSuccessResponse(listNotesByNotebookName(notebookName));
     }
 
-    private List<NoteVo> listNotes(String notebookName, boolean loadPreview) {
+    private List<NoteVo> listNotesByNotebookName(String notebookName) {
         File notebookDir = new File(getOrCreateUserNotebookDir(), notebookName);
         if (!notebookDir.exists() || notebookDir.isFile()){
             throw new RuntimeException("No such notebook");
@@ -107,10 +113,18 @@ public class NoteServiceImpl implements INoteService {
                     String title = file.getName().substring(0,file.getName().lastIndexOf("."));
                     String lastModifiedDate = DateTimeUtil.dateToStr(new Date(file.lastModified()));
                     String previewContent = null;
-                    if (loadPreview){
-                         previewContent = userNotePreviewCache.get(buildUserNoteKey(notebookName, title));
+                    Integer articleId = null;
+                    NotePreviewInfo previewInfo = userNotePreviewCache.get(buildUserNoteKey(notebookName, title));
+                    if (previewInfo != null) {
+                        previewContent = previewInfo.getPreviewContent();
+                        articleId = previewInfo.getArticleId();
                     }
-                    return new NoteVo().setNotebookName(notebookName).setTitle(title).setLastModifiedTime(lastModifiedDate).setPreviewContent(previewContent);
+
+                    return new NoteVo().setNotebookName(notebookName)
+                            .setTitle(title)
+                            .setArticleId(articleId)
+                            .setLastModifiedTime(lastModifiedDate)
+                            .setPreviewContent(previewContent);
                 })
                 .collect(Collectors.toList());
     }
@@ -128,7 +142,7 @@ public class NoteServiceImpl implements INoteService {
         }
         List<NoteVo> res = new ArrayList<>();
         notebookNameList.forEach(notebookName ->
-                listNotes(notebookName, true).stream()
+                listNotesByNotebookName(notebookName).stream()
                 .map(noteVo -> noteVo.setContent(userNoteCache.get(buildUserNoteKey(notebookName, noteVo.getTitle()))))
                 .filter(noteVo -> StringUtils.isNotBlank(noteVo.getContent()) && (noteVo.getContent().contains(keyWord)
                         || noteVo.getTitle().contains(keyWord)))
@@ -210,6 +224,10 @@ public class NoteServiceImpl implements INoteService {
             return ServerResponse.buildErrorResponse("Can't delete note");
         }
         String lastRef = GitUtil.getFileCurRef(getOrCreateUserGit(),relativeFileName);
+        NotePreviewInfo previewInfo = userNotePreviewCache.get(buildUserNoteKey(notebookName, noteTitle));
+        if (previewInfo.getArticleId() != null) {
+            articleService.deleteArticle(previewInfo.getArticleId());
+        }
         GitUtil.rmAndCommit(getOrCreateUserGit(),relativeFileName);
         delNoteRepository.save(new DelNoteDo().setNotebook(notebookName)
                                     .setTitle(noteTitle)
@@ -235,13 +253,17 @@ public class NoteServiceImpl implements INoteService {
 
     @Override
     public ServerResponse<String> getNote(String notebookName, String noteTitle){
-        String content = userNoteCache.get(buildUserNoteKey(notebookName, noteTitle));
+        return getNote(notebookName, noteTitle, getUsername());
+    }
+
+    @Override
+    public ServerResponse<String> getNote(String notebookName, String noteTitle, String username) {
+        String content = userNoteCache.get(buildUserNoteKey(notebookName, noteTitle, username));
         if (content == null){
             return ServerResponse.buildErrorResponse("读取笔记失败");
         }
         return ServerResponse.buildSuccessResponse(content);
     }
-
 
     @Override
     public ServerResponse<List<NoteVersionVo>> getNoteHistory(String notebookName, String noteTitle){
@@ -331,6 +353,11 @@ public class NoteServiceImpl implements INoteService {
         File srcFile = new File(getOrCreateUserNotebookDir(), srcRelativeName);
         fileService.deleteFile(srcFile);
         fileService.writeStringToFile(content, targetFile);
+        NotePreviewInfo previewInfo = userNotePreviewCache.get(buildUserNoteKey(srcNotebook, srcTitle, getUsername()));
+        // 先移动记录
+        if (previewInfo.getArticleId() != null) {
+            articleService.moveArticle(previewInfo.getArticleId(), targetNotebook, targetTitle);
+        }
         GitUtil.mvAndCommit(getOrCreateUserGit(), srcRelativeName, targetRelativeName);
         invalidateCache(buildUserNoteKey(srcNotebook, srcTitle));
         userNoteCache.put(buildUserNoteKey(targetNotebook, targetTitle), content);
@@ -382,7 +409,11 @@ public class NoteServiceImpl implements INoteService {
     }
 
     private UserNoteKey buildUserNoteKey(String notebookName, String noteTitle){
-        return new UserNoteKey().setNotebookName(notebookName).setNoteTitle(noteTitle).setUsername(getUsername());
+        return buildUserNoteKey(notebookName, noteTitle, getUsername());
+    }
+
+    private UserNoteKey buildUserNoteKey(String notebookName, String noteTitle, String username){
+        return new UserNoteKey().setNotebookName(notebookName).setNoteTitle(noteTitle).setUsername(username);
     }
 
 

@@ -30,4 +30,6 @@ public class NoteVo {
     private String notebookName;
 
     private int searchCount;
+
+    private Integer articleId;
 }

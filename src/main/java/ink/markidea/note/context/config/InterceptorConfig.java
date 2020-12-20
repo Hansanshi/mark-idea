@@ -23,7 +23,8 @@ public class InterceptorConfig implements WebMvcConfigurer {
         registry.addInterceptor(authorityInterceptor)
                 .addPathPatterns("/api/note/**", "/api/note", "/api/user/validate", "/api/user/logout", "/api/file", "/api/file/**","/api/admin/**")
                 .addPathPatterns("/api/delnote/**", "/api/delnote")
-                .addPathPatterns("/api/draftNote", "/api/draftNote/**");
+                .addPathPatterns("/api/draftNote", "/api/draftNote/**")
+                .addPathPatterns("/api/article", "/api/article/batchDel");
 
 
         registry.addInterceptor(httpRequestInterceptor)
@@ -31,7 +32,8 @@ public class InterceptorConfig implements WebMvcConfigurer {
                 .addPathPatterns("/api/delnote/**", "/api/delnote")
                 .addPathPatterns( "/api/file", "/api/file/**")
                 .addPathPatterns("/api/user/validate", "/api/user/logout", "/api/user/changePass")
-                .addPathPatterns("/api/draftNote", "/api/draftNote/**");
+                .addPathPatterns("/api/draftNote", "/api/draftNote/**")
+                .addPathPatterns("/api/**/**");
     }
 
 }

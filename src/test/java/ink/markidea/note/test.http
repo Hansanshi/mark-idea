@@ -1,0 +1,31 @@
+POST localhost:8090/api/article/
+Content-Type: application/json
+username: admin
+token: token_e8369f1e-b8b3-483f-81dc-fa4e98a328dd
+
+{
+  "notebookName" : "test",
+  "noteTitle" : "test"
+}
+
+
+### 登录
+POST localhost:8090/api/user/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+### 获取公开笔记列表
+GET localhost:8090/api/article?page=1&size=4
+username: admin
+token: token_2ddd2eac-ebd6-47cc-8f59-52a603cba29b
+
+###
+GET localhost:8090/api/article/admin/3
+
+###
+#username: admin
+#token: token_67835f23-0d11-4c3d-86cc-8392bf1775d3

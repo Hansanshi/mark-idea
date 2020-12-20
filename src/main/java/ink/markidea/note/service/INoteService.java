@@ -49,6 +49,11 @@ public interface INoteService {
     ServerResponse<String> getNote(String notebookName, String noteTitle);
 
     /**
+     * get the content of note
+     */
+    ServerResponse<String> getNote(String notebookName, String noteTitle, String username);
+
+    /**
      * get version history of note
      */
     ServerResponse<List<NoteVersionVo>> getNoteHistory(String notebookName, String noteTitle);

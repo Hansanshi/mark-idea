@@ -4,8 +4,11 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.github.benmanes.caffeine.cache.Weigher;
+import ink.markidea.note.entity.ArticleDo;
+import ink.markidea.note.entity.dto.NotePreviewInfo;
 import ink.markidea.note.entity.dto.UserNoteKey;
 import ink.markidea.note.entity.vo.UserVo;
+import ink.markidea.note.service.IArticleService;
 import ink.markidea.note.service.IFileService;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -27,6 +30,9 @@ public class CacheConfig {
 
     @Autowired
     private IFileService fileService;
+
+    @Autowired
+    private IArticleService articleService;
 
     @Autowired
     @Qualifier("userNoteCache")
@@ -59,13 +65,13 @@ public class CacheConfig {
 
 
     @Bean("userNotePreviewCache")
-    public LoadingCache<UserNoteKey, String> userNotePreviewCache(){
+    public LoadingCache<UserNoteKey, NotePreviewInfo> userNotePreviewCache(){
         return Caffeine.newBuilder()
                 .maximumWeight(10 * 1024 * 1024)
-                .weigher(new Weigher<UserNoteKey, String>() {
+                .weigher(new Weigher<UserNoteKey, NotePreviewInfo>() {
                     @Override
-                    public @NonNegative int weigh(@NonNull UserNoteKey key, @NonNull String value) {
-                        return value.length();
+                    public @NonNegative int weigh(@NonNull UserNoteKey key, @NonNull NotePreviewInfo value) {
+                        return value.getPreviewContent() == null ? 0:value.getPreviewContent().length();
                     }
                 })
                 .expireAfterWrite(12, TimeUnit.HOURS)
@@ -82,12 +88,17 @@ public class CacheConfig {
         return content;
     }
 
-    private String loadPreview(UserNoteKey key){
+    private NotePreviewInfo loadPreview(UserNoteKey key){
         String content = userNoteCache.get(key);
         if (content == null) {
             return  null;
         }
-        return content.substring(0, Math.min(60, content.length()));
+        NotePreviewInfo previewInfo = new NotePreviewInfo().setPreviewContent(content.substring(0, Math.min(60, content.length())));
+        ArticleDo articleDo = articleService.findByNotebookAndNoteTitle(key.getNotebookName(), key.getNoteTitle());
+        if (articleDo != null) {
+            previewInfo.setArticleId(articleDo.getId());
+        }
+        return previewInfo;
     }
 
 
