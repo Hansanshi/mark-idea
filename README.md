@@ -28,7 +28,7 @@ MarkIdea基于Git来管理笔记的历史版本，想必大家也比较熟悉这
 
 ![image-20200901191516442](https://gitee.com/hansanshi/image/raw/master/2020-09-27-6.32.42.png)
 
-目前设置功能比较简单，主要是文件管理、修改密码和设置备份至远程仓库，后续会开放更多功能。
+目前设置功能，主要是文件管理、修改密码和设置备份至远程仓库、公开笔记管理。
 
 目前只在Firefox浏览器和Chrome浏览器上进行过测试，其他浏览器效果未知。
 
@@ -36,7 +36,7 @@ MarkIdea基于Git来管理笔记的历史版本，想必大家也比较熟悉这
 
 运行环境仅需要安装jdk8，请根据自己系统安装对应jdk8并配置好环境，在此不再赘述。
 
-下载[软件](https://gitee.com/hansanshi/mark-idea/attach_files/491125/download/note-0.3.jar)后，在该目录下进入命令行，运行下面一行命令
+下载[软件](https://gitee.com/hansanshi/mark-idea/attach_files/555473/download/note-0.4.jar)后，在该目录下进入命令行，运行下面一行命令
 
 ```bash
 # 后台运行MarkIdea
@@ -106,9 +106,11 @@ nohup java -jar note-<version>.jar --username=<your_username> --password=<your_p
 
 ## 🍉 更新记录
 
-2020.09.27 支持文件管理，UI细节调整，升级Vditor版本
+2020.12.20 支持公开笔记，修复若干bug，升级编辑器
 
 2020.10.10 支持搜索功能
+
+2020.09.27 支持文件管理，UI细节调整，升级Vditor版本
 
 ## 🤖 TODO
 1. 公开笔记或简单博客

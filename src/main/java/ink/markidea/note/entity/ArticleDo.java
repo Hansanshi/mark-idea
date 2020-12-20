@@ -21,9 +21,6 @@ public class ArticleDo {
     @GeneratedValue
     private Integer id;
 
-    @Column(name = "article_title",nullable = false)
-    private String articleTitle;
-
     @Column(name = "notebook",nullable = false)
     private String notebookName;
 

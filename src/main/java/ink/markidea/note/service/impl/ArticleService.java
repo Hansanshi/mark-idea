@@ -74,7 +74,7 @@ public class ArticleService implements IArticleService {
         if (notePreviewInfo.getArticleId() != null) {
             return new ArticleVo().setArticleId(notePreviewInfo.getArticleId());
         }
-        ArticleDo articleDo = new ArticleDo().setArticleTitle(UUID.randomUUID().toString())
+        ArticleDo articleDo = new ArticleDo()
                 .setNotebookName(notebookName)
                 .setNoteTitle(noteTitle)
                 .setUsername(getUsername());
@@ -133,7 +133,6 @@ public class ArticleService implements IArticleService {
             return null;
         }
         return new ArticleVo().setArticleId(articleDo.getId())
-                .setArticleTitle(articleDo.getArticleTitle())
                 .setNotebookName(articleDo.getNotebookName())
                 .setNoteTitle(articleDo.getNoteTitle());
     }

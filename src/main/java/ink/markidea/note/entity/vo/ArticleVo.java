@@ -18,8 +18,6 @@ public class ArticleVo  {
 
     private Integer articleId;
 
-    private String articleTitle;
-
     private String notebookName;
 
     private String noteTitle;
