@@ -84,7 +84,7 @@ public class ContextPropertyLoader implements EnvironmentPostProcessor, Ordered 
 
     private void transferFrontResourceIfNecessary(ClassPathResource resource, File frontDir) {
         if (frontDir.listFiles() != null && frontDir.listFiles().length > 0){
-            return ;
+            FileUtil.deleteChildFiles(frontDir);
         }
         if (!resource.exists()){
             return ;

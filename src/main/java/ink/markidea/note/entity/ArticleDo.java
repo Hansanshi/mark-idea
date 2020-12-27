@@ -24,6 +24,9 @@ public class ArticleDo {
     @Column(name = "notebook",nullable = false)
     private String notebookName;
 
+    @Column(name = "article_title",nullable = true)
+    private String articleTitle = "";
+
     @Column(name = "note_title",nullable = false)
     private String noteTitle;
 

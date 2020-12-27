@@ -69,6 +69,22 @@ public class FileUtil {
         file.delete();
     }
 
+    public static void deleteChildFiles(File file) {
+        if (!file.exists()) {
+            return ;
+        }
+        if (file.isFile()) {
+            throw new RuntimeException("it's not a directory");
+        }
+        File[] childFiles = file.listFiles();
+        if (childFiles == null) {
+            return ;
+        }
+        for (File childFile : childFiles) {
+            deleteFileOrDirectory(childFile);
+        }
+    }
+
     public static void copyDirectory(File srcDir, File targetDir) {
         if (!srcDir.exists()) {
             throw new IllegalStateException("srcDir doesn't exist");
