@@ -15,8 +15,6 @@ public interface ArticleRepository extends JpaRepository<ArticleDo, Integer> {
 
     ArticleDo findByIdAndUsername(Integer id, String username);
 
-    ArticleDo findByArticleTitleAndUsername(String articleTitle, String username);
-
     ArticleDo findFirstByNotebookNameAndNoteTitleAndUsername(String notebookName, String noteTitle, String username);
 
     List<ArticleDo> findAllByUsername(String username);

@@ -47,12 +47,6 @@ public class ArticleService implements IArticleService {
         return articleRepository.findFirstByNotebookNameAndNoteTitleAndUsername(notebookName, noteTitle, getUsername());
     }
 
-
-    @Override
-    public ArticleVo findByArticleTileAndUsername(String articleTitle, String username) {
-        return convert(articleRepository.findByArticleTitleAndUsername(articleTitle, username));
-    }
-
     @Override
     public ArticleVo findByArticleIdAndUsername(Integer articleId, String username) {
         return convert(articleRepository.findByIdAndUsername(articleId, username));

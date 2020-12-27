@@ -10,8 +10,6 @@ public interface IArticleService {
 
      ArticleDo findByNotebookAndNoteTitle(String notebookName, String noteTitle);
 
-     ArticleVo findByArticleTileAndUsername(String articleTitle, String username);
-
      ArticleVo findByArticleIdAndUsername(Integer articleId, String username);
 
      Page<ArticleVo> listArticles(Integer page, Integer size);
