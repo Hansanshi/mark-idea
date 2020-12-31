@@ -2,11 +2,11 @@
 
 MarkIdea 是一款开源免费的私有云笔记软件，支持跨平台部署，支持Markdown格式笔记，采用Git进行笔记的版本管理，亦可推送至远程Git仓库备份。
 
-MarkIdea本身是一个Java程序，所以它可以部署多种平台上，包括但不限于Linux、macOS和Windows等，只要你的设备能安装jre或jdk即可，不依赖外部数据库（使用了Sqlite作为嵌入式数据库）。MarkIdea是B/S架构（浏览器/服务器），打开浏览器，访问网址即可，无需下载客户端。
+MarkIdea本身是一个Java程序，所以它可以部署多种平台上，包括但不限于Linux、macOS和Windows等，只要你的设备能安装jre或jdk即可，不依赖外部数据库（使用了Sqlite作为嵌入式数据库，当然稍微改改也可以使用mysql等其他数据库，不过我的想法近可能少依赖其他组件）。MarkIdea是B/S架构（浏览器/服务器），打开浏览器，访问网址即可，无需下载客户端。
 
-使用MarkIdea记录的笔记是易于迁移，因为使用的笔记格式是Markdown——开放且轻量级的标记语言，倘若不再想使用MarkIdea，仅需要拷贝对应的目录出来即可，文件名即笔记的题目，文件夹名即笔记本名称。
+使用MarkIdea记录的笔记是易于迁移，因为使用的笔记格式是Markdown——开放且轻量级的标记语言，不必担心商业软件的各种私有笔记格式在导入导出过程中样式丢失。倘若不再想使用MarkIdea，仅需要拷贝对应的目录出来即可，文件名即笔记的题目，文件夹名即笔记本名称。
 
-MarkIdea基于Git来管理笔记的历史版本，想必大家也比较熟悉这个版本管理工具，同时MarkIdea也支持推送至远程Git仓库备份，提高笔记的安全性。
+MarkIdea基于Git来管理笔记的历史版本，想必大家也比较熟悉这个版本管理工具，采用Git管理笔记版本也方便有一天不再使用MarkIdea时还可以借助其他Git工具查看或恢复笔记历史。同时MarkIdea也支持推送至远程Git仓库备份，提高笔记的安全性。
 
 如有bug，欢迎反馈。如需尝试可访问[demo网站](http://sanshicloud.cn:8090)，用户名和密码均为admin，仅供尝试，服务器带宽较小，访问较为缓慢。亦可在[知乎](https://www.zhihu.com/people/hansanshi)私信反馈
 
@@ -106,6 +106,8 @@ nohup java -jar note-<version>.jar --username=<your_username> --password=<your_p
 
 ## 🍉 更新记录
 
+2020.12.31 重命名笔记本、UI优化、自动保存笔记（10秒）
+
 2020.12.27 工具栏固定，修复bug
 
 2020.12.20 支持公开笔记，修复若干bug，升级编辑器
@@ -115,10 +117,14 @@ nohup java -jar note-<version>.jar --username=<your_username> --password=<your_p
 2020.09.27 支持文件管理，UI细节调整，升级Vditor版本
 
 ## 🤖 TODO
-1.远程仓库初始化
-2.公开笔记聚合页
-3.远程仓库界面优化
-4.用户手册
+
+1. 远程仓库初始化
+
+2. 公开笔记聚合页
+
+3. 远程仓库界面优化
+
+4. 用户手册
 
 
 
