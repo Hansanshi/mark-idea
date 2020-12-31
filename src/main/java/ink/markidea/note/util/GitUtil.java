@@ -434,4 +434,13 @@ public class GitUtil {
             throw new RuntimeException("git status error");
         }
     }
+
+    public static void discardChange(Git git, String path){
+        try {
+            git.checkout().addPath(path).call();
+        } catch (GitAPIException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

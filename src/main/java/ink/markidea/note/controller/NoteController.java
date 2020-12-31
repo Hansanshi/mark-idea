@@ -142,7 +142,12 @@ public class NoteController {
      */
     @DeleteMapping("/{notebookName}/{noteTitle}")
     public ServerResponse delNote(@PathVariable String notebookName,
-                                  @PathVariable String noteTitle){
+                                  @PathVariable String noteTitle,
+                                  Boolean delDraft){
+        if (Boolean.TRUE.equals(delDraft)) {
+            noteService.delTmpSavedNote(noteTitle, notebookName);
+            return ServerResponse.buildSuccessResponse();
+        }
         return noteService.deleteNote(notebookName, noteTitle);
     }
 

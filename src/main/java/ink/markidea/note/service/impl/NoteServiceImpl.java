@@ -236,6 +236,11 @@ public class NoteServiceImpl implements INoteService {
     }
 
     @Override
+    public void delTmpSavedNote(String noteTitle, String notebookName) {
+        GitUtil.discardChange(getOrCreateUserGit(), getRelativeFileName(notebookName, noteTitle));
+    }
+
+    @Override
     public ServerResponse deleteNote(String notebookName, String noteTitle){
         String relativeFileName = getRelativeFileName(notebookName,noteTitle);
         File noteFile = new File(getOrCreateUserNotebookDir(), relativeFileName);

@@ -42,6 +42,8 @@ public interface INoteService {
      */
     void tmpSaveNote(String noteTitle, String notebookName, String content);
 
+    void delTmpSavedNote(String noteTitle, String notebookName);
+
     /**
      * delete note
      */
