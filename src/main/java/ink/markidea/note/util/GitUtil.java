@@ -11,6 +11,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -412,6 +413,25 @@ public class GitUtil {
             return Git.open(gitDir);
         } catch (IOException e) {
             return null;
+        }
+    }
+
+    public static Set<String> getModifiedButUnCommitted(Git git, String dirPath) {
+        try {
+            Status status = git.status().addPath(dirPath).call();
+            Set<String> modifiedSet = status.getModified();
+            Set<String> unTrackedSet = status.getUntracked();
+            if (unTrackedSet.isEmpty()) {
+                return modifiedSet;
+            } else if (modifiedSet.isEmpty()) {
+                return unTrackedSet;
+            }
+            Set<String> mergedSet = new HashSet<>(modifiedSet);
+            mergedSet.addAll(unTrackedSet);
+            return mergedSet;
+        } catch (GitAPIException e) {
+            log.error("git status error", e);
+            throw new RuntimeException("git status error");
         }
     }
 }

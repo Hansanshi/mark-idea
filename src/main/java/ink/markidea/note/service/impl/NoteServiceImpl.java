@@ -6,6 +6,7 @@ import ink.markidea.note.dao.DraftNoteRepository;
 import ink.markidea.note.entity.DelNoteDo;
 import ink.markidea.note.entity.dto.NotePreviewInfo;
 import ink.markidea.note.entity.dto.UserNoteKey;
+import ink.markidea.note.entity.exception.PromptException;
 import ink.markidea.note.entity.resp.ServerResponse;
 import ink.markidea.note.entity.vo.DeletedNoteVo;
 import ink.markidea.note.entity.vo.NoteVersionVo;
@@ -14,6 +15,7 @@ import ink.markidea.note.service.IArticleService;
 import ink.markidea.note.service.IFileService;
 import ink.markidea.note.service.INoteService;
 import ink.markidea.note.util.DateTimeUtil;
+import ink.markidea.note.util.FileUtil;
 import ink.markidea.note.util.GitUtil;
 import ink.markidea.note.util.ThreadLocalUtil;
 import lombok.NonNull;
@@ -103,6 +105,8 @@ public class NoteServiceImpl implements INoteService {
         if (childFiles == null || childFiles.length == 0 ){
             return Collections.emptyList();
         }
+
+        Set<String> modifiedSet = GitUtil.getModifiedButUnCommitted(getOrCreateUserGit(), notebookName);
         // sort by lastModifiedTime and convert
         Arrays.sort(childFiles, (f1, f2) -> (int) (
                 f2.lastModified() - f1.lastModified()));
@@ -119,9 +123,10 @@ public class NoteServiceImpl implements INoteService {
                         previewContent = previewInfo.getPreviewContent();
                         articleId = previewInfo.getArticleId();
                     }
-
+                    int noteStatus = modifiedSet.contains(getRelativeFileName(notebookName, title)) ? NoteVo.STATUS_TMP_SAVED:NoteVo.STATUS_PRIVATE;
                     return new NoteVo().setNotebookName(notebookName)
                             .setTitle(title)
+                            .setStatus(noteStatus)
                             .setArticleId(articleId)
                             .setLastModifiedTime(lastModifiedDate)
                             .setPreviewContent(previewContent);
@@ -164,6 +169,9 @@ public class NoteServiceImpl implements INoteService {
     @Override
     public ServerResponse createNotebook(String notebookName){
         File notebookDir = new File(getOrCreateUserNotebookDir(), notebookName);
+        if (notebookDir.exists()) {
+            throw new PromptException("笔记本已存在");
+        }
         if (!notebookDir.mkdir()) {
             throw new RuntimeException("Create notebook failed");
         }
@@ -204,6 +212,7 @@ public class NoteServiceImpl implements INoteService {
             }
         } catch (IOException e) {
             log.error("save note error", e);
+            throw new RuntimeException("Save note failed");
         }
 
         //write file
@@ -213,6 +222,17 @@ public class NoteServiceImpl implements INoteService {
         draftNoteRepository.deleteByUsernameAndNotebookNameAndTitle(getUsername(), notebookName, noteTitle);
         invalidateCache(buildUserNoteKey(notebookName, noteTitle));
         return ServerResponse.buildSuccessResponse();
+    }
+
+    @Override
+    public void tmpSaveNote(String noteTitle, String notebookName, String content) {
+        String relativeFileName = getRelativeFileName(notebookName,noteTitle);
+        File noteFile = new File(getOrCreateUserNotebookDir(), relativeFileName);
+        if (noteFile.exists() && noteFile.isDirectory()) {
+            return ;
+        }
+        fileService.writeStringToFile(content, noteFile);
+        invalidateCache(buildUserNoteKey(notebookName, noteTitle));
     }
 
     @Override
@@ -290,6 +310,30 @@ public class NoteServiceImpl implements INoteService {
         fileService.deleteFile(notebookDir);
         GitUtil.rmAndCommit(getOrCreateUserGit(),notebookName + "/" + NOTEBOOK_FLAG_FILE);
         return ServerResponse.buildSuccessResponse();
+    }
+
+    @Override
+    public void renameNotebook(String srcNotebookName, String targetNotebookName) {
+        File srcNotebookDir = getNotebookDir(srcNotebookName);
+        if (!srcNotebookDir.exists() || srcNotebookDir.isFile()) {
+            throw new PromptException("笔记本不存在");
+        }
+
+        File targetNotebookDir = getNotebookDir(targetNotebookName);
+        if (targetNotebookDir.exists()) {
+            throw new PromptException("目标笔记本已存在");
+        }
+//        if (!targetNotebookDir.mkdir()) {
+//            throw new PromptException("目标笔记本无法创建");
+//        }
+        List<NoteVo> noteVoList = listNotes(srcNotebookName).getData();
+        if (!FileUtil.renameFileOrDir(srcNotebookDir, targetNotebookDir)) {
+            throw new PromptException("重命名笔记本失败");
+        }
+        GitUtil.rmAndCommit(getOrCreateUserGit(), srcNotebookName);
+        GitUtil.addAndCommit(getOrCreateUserGit(), targetNotebookName);
+        noteVoList.forEach(noteVo -> invalidateCache(buildUserNoteKey(srcNotebookName, noteVo.getTitle())));
+        articleService.updateArticlesNotebookName(srcNotebookName, targetNotebookName);
     }
 
     /**
@@ -431,5 +475,9 @@ public class NoteServiceImpl implements INoteService {
     void invalidateCache(UserNoteKey key){
         userNotePreviewCache.invalidate(key);
         userNoteCache.invalidate(key);
+    }
+
+    File getNotebookDir(String notebookName) {
+        return new File(getOrCreateUserNotebookDir(), notebookName);
     }
 }

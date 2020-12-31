@@ -38,6 +38,11 @@ public interface INoteService {
     ServerResponse saveNote(String noteTitle, String notebookName, String content);
 
     /**
+     * save note temporarily
+     */
+    void tmpSaveNote(String noteTitle, String notebookName, String content);
+
+    /**
      * delete note
      */
     ServerResponse deleteNote(String notebookName, String noteTitle);
@@ -67,6 +72,11 @@ public interface INoteService {
      * delete notebook and its all notes
      */
     ServerResponse deleteNotebook(String notebookName);
+
+    /**
+     * rename a notebook
+     */
+    void renameNotebook(String srcNotebookName, String targetNotebookName);
 
     /**
      * list all delnotes

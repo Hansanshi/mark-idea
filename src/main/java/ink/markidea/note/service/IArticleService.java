@@ -24,4 +24,8 @@ public interface IArticleService {
 
      void batchDeleteArticle(List<ArticleVo> idList);
 
+     void batchDeleteArticlesByNotebookName(String notebookName);
+
+     void updateArticlesNotebookName(String srcNotebook, String targetNotebook);
+
 }

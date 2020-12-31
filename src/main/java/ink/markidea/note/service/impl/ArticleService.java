@@ -102,6 +102,16 @@ public class ArticleService implements IArticleService {
                 articleList.stream().map(ArticleVo::getArticleId).collect(Collectors.toList()));
     }
 
+    @Override
+    public void batchDeleteArticlesByNotebookName(String notebookName) {
+        articleRepository.deleteAllByUsernameAndNotebookName(getUsername(), notebookName);
+    }
+
+    @Override
+    public void updateArticlesNotebookName(String srcNotebook, String targetNotebook) {
+        articleRepository.updateNotebookName(getUsername(), srcNotebook, targetNotebook);
+    }
+
     private String getUsername(){
         return ThreadLocalUtil.getUsername();
     }

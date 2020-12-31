@@ -41,6 +41,10 @@ public class NoteController {
         if (StringUtils.isNotBlank(request.getVersionRef())){
             return noteService.resetAndGet(notebookName, noteTitle, request.getVersionRef());
         }
+        if (request.isTmpSave()) {
+            noteService.tmpSaveNote(noteTitle, notebookName, request.getContent());
+            return ServerResponse.buildSuccessResponse();
+        }
         return noteService.saveNote(noteTitle, notebookName, request.getContent());
     }
 
@@ -94,10 +98,14 @@ public class NoteController {
     }
 
     /**
-     * create a notebook
+     * create or rename a notebook
      */
     @PutMapping("/{notebookName}")
-    public ServerResponse createNotebook(@PathVariable String notebookName){
+    public ServerResponse createNotebook(@PathVariable String notebookName, @RequestBody NoteRequest request){
+        if (Boolean.TRUE.equals(request.getMove())) {
+            noteService.renameNotebook(request.getSrcNotebook(), notebookName);
+            return ServerResponse.buildSuccessResponse(noteService.listNotes(notebookName).getData());
+        }
         return noteService.createNotebook(notebookName);
     }
 

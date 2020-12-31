@@ -25,6 +25,7 @@ public class ArticleDo {
     private String notebookName;
 
     @Column(name = "article_title",nullable = true)
+    @Deprecated
     private String articleTitle = "";
 
     @Column(name = "note_title",nullable = false)

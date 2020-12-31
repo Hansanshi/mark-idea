@@ -17,6 +17,8 @@ public class NoteVo {
 
     public static final int STATUS_PUBLIC = 1;
 
+    public static final int STATUS_TMP_SAVED = 2;
+
     private String title;
 
     private int status =  STATUS_PRIVATE;

@@ -33,5 +33,7 @@ public class NoteRequest {
 
     private Boolean move;
 
+    private boolean tmpSave = false;
+
 
 }

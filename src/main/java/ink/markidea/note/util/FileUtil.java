@@ -140,7 +140,7 @@ public class FileUtil {
             }
             zipInputStream.close();
             fileInputStream.close();
-        } catch (Exception e) {
+        } catch (Exception ignored) {
             // do nothing
         }
 
@@ -173,5 +173,18 @@ public class FileUtil {
         return new DecimalFormat("#.00").format(fileSize/1000.0/1000.0) + " TB";
 
     }
+
+    public static boolean renameFileOrDir(File src, File target) {
+        return src.renameTo(target);
+    }
+
+    public static boolean renameFileOrDir(String srcPath, String targetPath) {
+        return renameFileOrDir(new File(srcPath), new File(targetPath));
+    }
+
+    public static void main(String[] args) {
+        renameFileOrDir("/Users/hansanshi/Projects/hanshinote-front/public", "/Users/hansanshi/Projects/hanshinote-front/private");
+    }
+
 
 }
