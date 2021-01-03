@@ -2,7 +2,6 @@ package ink.markidea.note.service.impl;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import ink.markidea.note.dao.DelNoteRepository;
-import ink.markidea.note.dao.DraftNoteRepository;
 import ink.markidea.note.entity.DelNoteDo;
 import ink.markidea.note.entity.dto.NotePreviewInfo;
 import ink.markidea.note.entity.dto.UserNoteKey;
@@ -50,9 +49,6 @@ public class NoteServiceImpl implements INoteService {
 
     @Autowired
     private DelNoteRepository delNoteRepository;
-
-    @Autowired
-    private DraftNoteRepository draftNoteRepository;
 
     private static final String NOTEBOOK_FLAG_FILE = ".notebook";
 
@@ -219,7 +215,6 @@ public class NoteServiceImpl implements INoteService {
         fileService.writeStringToFile(content,noteFile);
         GitUtil.addAndCommit(getOrCreateUserGit(),relativeFileName);
 
-        draftNoteRepository.deleteByUsernameAndNotebookNameAndTitle(getUsername(), notebookName, noteTitle);
         invalidateCache(buildUserNoteKey(notebookName, noteTitle));
         return ServerResponse.buildSuccessResponse();
     }
