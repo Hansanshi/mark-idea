@@ -12,8 +12,7 @@ spring:
     static-locations: classpath:/static, file:${staticDir}, file:${frontDir}
   servlet:
     multipart:
-      max-file-size: 100MB
+      max-file-size: ${maxUploadFileSize:10MB}
 
-register-forbidden: true
 server:
   port: 8090

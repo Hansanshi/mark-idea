@@ -1,10 +1,18 @@
 package ink.markidea.note.controller;
 
+import ink.markidea.note.entity.dto.WebsiteConfigDto;
 import ink.markidea.note.entity.req.RemoteRepoRequest;
+import ink.markidea.note.entity.req.WebsiteConfigReq;
 import ink.markidea.note.entity.resp.ServerResponse;
 import ink.markidea.note.service.IAdminService;
+import ink.markidea.note.service.IFileService;
+import ink.markidea.note.service.INoteService;
+import ink.markidea.note.util.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
 
 /**
  * @author hansanshi
@@ -17,38 +25,14 @@ public class AdminController {
     @Autowired
     private IAdminService adminService;
 
-    @PutMapping("remote")
-    public ServerResponse setRemoteRepoUrl(@RequestBody RemoteRepoRequest request){
-        return adminService.setRemoteRepoUrl(request.getRemoteRepoUrl());
+    @GetMapping("websiteConfig")
+    public ServerResponse<WebsiteConfigDto> pullWebsiteConfig(){
+        return ServerResponse.buildSuccessResponse(adminService.getWebsiteConfig());
     }
 
-    @GetMapping("remote")
-    public ServerResponse getRemoteRepoUrl(){
-        return adminService.getRemoteRepoUrl();
+    @PostMapping("updateWebsiteConfig")
+    public ServerResponse updateWebsiteConfig(@RequestBody WebsiteConfigReq req) {
+        return adminService.updateWebSiteConfig(req) ? ServerResponse.buildSuccessResponse() : ServerResponse.buildErrorResponse("更新失败");
     }
 
-    @PostMapping("sshkey")
-    public ServerResponse<String> genSshKeys(){
-        return adminService.generateSshKey();
-    }
-
-    @DeleteMapping("push")
-    public ServerResponse stopPushToRemote(){
-        return adminService.stopPushToRemoteRepo();
-    }
-
-    @GetMapping("push")
-    public ServerResponse checkPushStatus(){
-        return adminService.checkPushTaskStatus();
-    }
-
-    @PostMapping("push")
-    public ServerResponse startPushToRemote(){
-        return adminService.startPushToRemoteRepo();
-    }
-
-    @PostMapping("pull")
-    public ServerResponse pullFromRemote(){
-        return adminService.pullFromRemote();
-    }
 }

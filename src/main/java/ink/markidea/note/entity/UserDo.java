@@ -1,5 +1,6 @@
 package ink.markidea.note.entity;
 
+import ink.markidea.note.constant.UserConstant;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -30,27 +31,12 @@ public class UserDo {
     @Column(nullable = false)
     private String password;
 
-    @Column
-    private String avatar;
-
-    @Column
-    private String email;
-
-    @Column
-    private String phone;
-
-    @Column
-    private String intro;
-
     /**
      * 默认0是管理员, 1是普通用户
      */
     @Column
     @ColumnDefault("1")
-    private Integer status;
-
-    @Column
-    private String ext;
+    private Integer status = UserConstant.COMMON_USER;
 
     @Column(name = "remote_repo")
     private String remoteRepository;
@@ -61,12 +47,8 @@ public class UserDo {
     @Column
     private boolean push = false;
 
-    /** ssh 私钥 */
-    @Column(name = "prv_key")
-    private String prvKey;
 
-    /** ssh 公钥 */
-    @Column(name = "pub_key")
-    private String pubKey;
-
+    /** 编辑器配置 */
+    @Column(name = "editor_config")
+    private String editorConfig;
 }

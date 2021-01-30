@@ -1,11 +1,18 @@
 package ink.markidea.note.service.impl;
 
 import com.github.benmanes.caffeine.cache.Cache;
+import ink.markidea.note.constant.RegisterConstant;
+import ink.markidea.note.constant.UserConstant;
 import ink.markidea.note.dao.UserRepository;
 import ink.markidea.note.entity.UserDo;
+import ink.markidea.note.entity.dto.EditorConfigDto;
+import ink.markidea.note.entity.exception.NoAuthorityException;
+import ink.markidea.note.entity.exception.PromptException;
+import ink.markidea.note.entity.req.EditorConfigReq;
 import ink.markidea.note.entity.resp.ServerResponse;
 import ink.markidea.note.entity.vo.UserVo;
 import ink.markidea.note.service.IUserService;
+import ink.markidea.note.util.JsonUtil;
 import ink.markidea.note.util.MD5Util;
 import ink.markidea.note.util.ThreadLocalUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -33,8 +40,12 @@ public class UserServiceImpl implements IUserService {
     @Value("${password:admin}")
     private String adminPassword;
 
-    @Value("${register-forbidden}")
-    private boolean registerForbidden;
+    /**
+     * 注册控制策略
+     */
+    @Value("${registerStrategy}")
+    private volatile Integer registerStrategy;
+
 
     @Autowired
     private UserRepository userRepository;
@@ -45,7 +56,7 @@ public class UserServiceImpl implements IUserService {
     private void initAdminUser(){
         UserDo userDO = userRepository.findFirstByStatus(0);
         if (userDO == null){
-            UserDo adminUser = new UserDo().setUsername(adminUsername).setPassword(MD5Util.MD5EncodeUtf8(adminPassword)).setStatus(0);
+            UserDo adminUser = new UserDo().setUsername(adminUsername).setPassword(MD5Util.MD5EncodeUtf8(adminPassword)).setStatus(UserConstant.ADMIN_USER);
             userRepository.save(adminUser);
         }
     }
@@ -57,7 +68,10 @@ public class UserServiceImpl implements IUserService {
         if (userDO == null){
             return ServerResponse.buildErrorResponse("用户名或密码错误");
         }
-        UserVo userVo = new UserVo().setToken(TOKEN_PREFIX + UUID.randomUUID().toString()).setUsername(username);
+        UserVo userVo = new UserVo().setToken(TOKEN_PREFIX + UUID.randomUUID().toString()).setUsername(username).setType(userDO.getStatus());
+        if (StringUtils.isNotBlank(userDO.getEditorConfig())) {
+            userVo.setEditorConfig(JsonUtil.stringToObj(userDO.getEditorConfig(), EditorConfigDto.class));
+        }
         userCache.put(userVo.getUsername(), userVo);
         return ServerResponse.buildSuccessResponse(userVo);
     }
@@ -72,6 +86,17 @@ public class UserServiceImpl implements IUserService {
         }
     }
 
+
+    @Override
+    public boolean checkAdminUser(String username, String token) {
+        UserVo userVo = userCache.getIfPresent(username);
+        if (userVo == null || !token.equals(userVo.getToken())){
+            return false;
+        }
+
+        return userVo.getType() == UserConstant.ADMIN_USER;
+    }
+
     @Override
     public ServerResponse logout() {
         userCache.invalidate(getUsername());
@@ -80,8 +105,8 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public ServerResponse<UserVo> register(String username, String password){
-        if (registerForbidden){
-            throw new RuntimeException("Register forbidden");
+        if (RegisterConstant.NOT_ALLOW_REGISTER == registerStrategy){
+            throw new PromptException("禁止注册");
         }
         if (StringUtils.isAnyBlank(username, password)){
             throw new IllegalArgumentException();
@@ -116,4 +141,27 @@ public class UserServiceImpl implements IUserService {
         return ThreadLocalUtil.getUsername();
     }
 
+    @Override
+    public void setRegisterStrategy(Integer strategy) {
+        this.registerStrategy = strategy;
+    }
+
+    @Override
+    public EditorConfigDto getEditorConfig() {
+        String editorConfigStr = userRepository.findByUsername(getUsername()).getEditorConfig();
+        if (StringUtils.isBlank(editorConfigStr)) {
+            return new EditorConfigDto();
+        } else {
+            return JsonUtil.stringToObj(editorConfigStr, EditorConfigDto.class);
+        }
+
+    }
+
+    @Override
+    public EditorConfigDto updateEditorConfig(EditorConfigReq req) {
+        UserDo userDo = userRepository.findByUsername(getUsername());
+        userDo.setEditorConfig(JsonUtil.objToString(req));
+        userRepository.save(userDo);
+        return req;
+    }
 }

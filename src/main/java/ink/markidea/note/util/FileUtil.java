@@ -117,6 +117,13 @@ public class FileUtil {
         }
     }
 
+    public static void unzip(File sourceFile, File destFile) {
+        try {
+            unzip(new FileInputStream(sourceFile), destFile.getAbsolutePath());
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException("file not found");
+        }
+    }
 
     public static void unzip(InputStream fileInputStream, String destPath) {
         ZipInputStream zipInputStream = new ZipInputStream(fileInputStream);
@@ -181,10 +188,5 @@ public class FileUtil {
     public static boolean renameFileOrDir(String srcPath, String targetPath) {
         return renameFileOrDir(new File(srcPath), new File(targetPath));
     }
-
-    public static void main(String[] args) {
-        renameFileOrDir("/Users/hansanshi/Projects/hanshinote-front/public", "/Users/hansanshi/Projects/hanshinote-front/private");
-    }
-
 
 }

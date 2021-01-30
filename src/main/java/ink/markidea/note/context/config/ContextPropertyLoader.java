@@ -1,6 +1,9 @@
 package ink.markidea.note.context.config;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import ink.markidea.note.entity.dto.WebsiteConfigDto;
 import ink.markidea.note.util.FileUtil;
+import ink.markidea.note.util.JsonUtil;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.boot.system.ApplicationHome;
@@ -28,13 +31,8 @@ public class ContextPropertyLoader implements EnvironmentPostProcessor, Ordered 
 
         Map<String,Object> map = new HashMap<>();
 
-        boolean devSwitch = true;
         String path ;
-        if (devSwitch){
-            path = home.getDir().getAbsolutePath();
-        }else {
-            path = "/Users/hansanshi/Documents/tests";
-        }
+        path = home.getDir().getAbsolutePath();
         addPathAndInitDir(map, path);
         PropertySource propertySource = new MapPropertySource("markidea-sys",map);
         environment.getPropertySources().addLast(propertySource);
@@ -78,6 +76,30 @@ public class ContextPropertyLoader implements EnvironmentPostProcessor, Ordered 
         File fileDir = new File(staticDir, "file");
         checkAndCreateDirIfNecessary(fileDir);
         map.put("fileDir", fileDir.getAbsolutePath());
+
+        // config dir
+
+        File configDir = new File(staticDir, "config");
+        checkAndCreateDirIfNecessary(configDir);
+        map.put("configDir", configDir.getAbsolutePath());
+
+        // load website config file
+        File websiteConfigFile = new File(configDir, "website-config.json");
+        WebsiteConfigDto websiteConfig ;
+        if (websiteConfigFile.exists()) {
+            String jsonStr = FileUtil.readFileAsString(websiteConfigFile);
+            websiteConfig = JsonUtil.stringToObj(jsonStr, WebsiteConfigDto.class);
+            File indexHtmlFile = new File(frontDir, "index.html");
+            String indexHtmlStr  = FileUtil.readFileAsString(indexHtmlFile);
+            String newIndexHtml = indexHtmlStr.replace("<title>" + "MarkIdea" + "</title>", "<title>" + websiteConfig.getWebsiteTitle() + "</title>");
+            FileUtil.writeStringToFile(newIndexHtml, indexHtmlFile);
+        } else {
+            websiteConfig = new WebsiteConfigDto();
+        }
+
+        Map<String, String> configProperties = JsonUtil.stringToObj(JsonUtil.objToString(websiteConfig), new TypeReference<Map<String, String>>() {});
+        assert configProperties != null;
+        map.putAll(configProperties);
 
 
     }

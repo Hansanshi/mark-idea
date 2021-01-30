@@ -1,13 +1,16 @@
 package ink.markidea.note.service.impl;
 
+import ink.markidea.note.constant.RegisterConstant;
+import ink.markidea.note.context.config.CacheConfig;
 import ink.markidea.note.context.task.NoteTimer;
 import ink.markidea.note.dao.UserRepository;
+import ink.markidea.note.entity.dto.WebsiteConfigDto;
 import ink.markidea.note.entity.exception.PromptException;
+import ink.markidea.note.entity.req.WebsiteConfigReq;
 import ink.markidea.note.entity.resp.ServerResponse;
 import ink.markidea.note.service.IAdminService;
-import ink.markidea.note.util.GitUtil;
-import ink.markidea.note.util.SshUtil;
-import ink.markidea.note.util.ThreadLocalUtil;
+import ink.markidea.note.service.IUserService;
+import ink.markidea.note.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -28,14 +31,23 @@ public class AdminServiceImpl implements IAdminService {
     @Value("${notesDir}")
     private String notesDir;
 
+    @Value(("${frontDir}"))
+    private String frontDir;
+
     @Autowired
     private NoteTimer noteTimer;
 
     @Value("${sshKeysDir}")
     private String sshKeysDir;
 
+    @Value("${configDir}")
+    private String configDir;
+
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private IUserService userService;
 
     @Override
     public ServerResponse setRemoteRepoUrl(String remoteRepoUrl) {
@@ -99,6 +111,66 @@ public class AdminServiceImpl implements IAdminService {
         }
         dir.mkdir();
         return dir;
+    }
+
+    @Override
+    public synchronized boolean updateWebSiteConfig(WebsiteConfigReq req) {
+        WebsiteConfigDto originWebsiteConfig = getWebsiteConfig();
+        validateWebsiteConfig(req);
+        updateWebsiteTitleIfChange(req, originWebsiteConfig);
+        updateRegisterStrategyIfChange(req, originWebsiteConfig);
+        updateTokenExpireTimeIfChange(req, originWebsiteConfig);
+        File websiteConfigFile = new File(configDir, "website-config.json");
+        return FileUtil.writeStringToFile(JsonUtil.objToString(req), websiteConfigFile);
+    }
+
+    private void updateTokenExpireTimeIfChange(WebsiteConfigReq req, WebsiteConfigDto originWebsiteConfig) {
+        if (req.getTokenExpireTimeInHour() == originWebsiteConfig.getTokenExpireTimeInHour()) {
+            return ;
+        }
+        CacheConfig.setTokenExpireTimeInHour(req.getTokenExpireTimeInHour());
+    }
+
+    private void updateRegisterStrategyIfChange(WebsiteConfigReq req, WebsiteConfigDto originWebsiteConfig) {
+        if (originWebsiteConfig.getRegisterStrategy().equals(req.getRegisterStrategy())) {
+            return ;
+        }
+        userService.setRegisterStrategy(req.getRegisterStrategy());
+    }
+
+    private void updateWebsiteTitleIfChange(WebsiteConfigReq req, WebsiteConfigDto originWebsiteConfig) {
+        if (originWebsiteConfig.getWebsiteTitle().equals(req.getWebsiteTitle())) {
+            return ;
+        }
+        File indexHtmlFile = new File(frontDir, "index.html");
+        String indexHtmlStr  = FileUtil.readFileAsString(indexHtmlFile);
+        String newIndexHtml = indexHtmlStr.replace("<title>" + originWebsiteConfig.getWebsiteTitle() + "</title>", "<title>" + req.getWebsiteTitle() + "</title>");
+        FileUtil.writeStringToFile(newIndexHtml, indexHtmlFile);
+    }
+
+    private void validateWebsiteConfig(WebsiteConfigReq req) {
+        if (req.getWebsiteTitle().contains("<")) {
+            throw new IllegalArgumentException();
+        }
+        if (req.getRegisterStrategy() != RegisterConstant.NOT_ALLOW_REGISTER && req.getRegisterStrategy() != RegisterConstant.ALLOW_REGISTER) {
+            throw new IllegalArgumentException();
+        }
+        try{
+            Integer num = Integer.valueOf(req.getMaxUploadFileSize().substring(0, req.getMaxUploadFileSize().length() - 2));
+            req.setMaxUploadFileSize(num + "MB");
+        } catch (Exception e) {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    @Override
+    public WebsiteConfigDto getWebsiteConfig() {
+        File websiteConfigFile = new File(configDir, "website-config.json");
+        if (!websiteConfigFile.exists()) {
+            return new WebsiteConfigDto();
+        }
+        String configStr = FileUtil.readFileAsString(websiteConfigFile);
+        return JsonUtil.stringToObj(configStr, WebsiteConfigDto.class);
     }
 
     private Git getOrCreateUserGit(){

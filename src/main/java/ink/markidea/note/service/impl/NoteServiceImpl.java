@@ -420,6 +420,13 @@ public class NoteServiceImpl implements INoteService {
         return notebookName + "/" + noteTitle+".md";
     }
 
+    @Override
+    public File getOrInitUserNotebookDir() {
+        File dir =  getOrCreateUserNotebookDir();
+        GitUtil.checkGitDir(dir);
+        return null;
+    }
+
     private File getOrCreateUserNotebookDir(){
         File dir = new File(notesDir, getUsername());
         if (dir.exists()){
@@ -441,7 +448,7 @@ public class NoteServiceImpl implements INoteService {
         return null;
     }
 
-    private Git getOrCreateUserGit(){
+    public Git getOrCreateUserGit(){
         return GitUtil.getOrInitGit(getOrCreateUserNotebookDir());
     }
 

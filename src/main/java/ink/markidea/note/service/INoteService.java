@@ -6,6 +6,7 @@ import ink.markidea.note.entity.vo.DeletedNoteVo;
 import ink.markidea.note.entity.vo.NoteVersionVo;
 import ink.markidea.note.entity.vo.NoteVo;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -114,6 +115,11 @@ public interface INoteService {
      * @return
      */
     ServerResponse copyNote(String srcNotebook, String targetNotebook, String title);
+
+    /**
+     * 获取用户文件夹目录
+     */
+    File getOrInitUserNotebookDir();
 
 
 }

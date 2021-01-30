@@ -21,20 +21,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ServerResponse handleException(Exception e){
         log.error("exception ",e);
-        return ServerResponse.buildErrorResponse("System error");
+        return ServerResponse.buildErrorResponse("系统异常");
     }
 
     @ExceptionHandler(NullPointerException.class)
     public ServerResponse handleNullException(Exception e){
         log.error("Argument is null ",e);
-        return ServerResponse.buildErrorResponse("Null arguments");
+        return ServerResponse.buildErrorResponse("参数为空");
     }
 
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ServerResponse handleIllegalArgs(Exception e){
         log.error("Illegal arguments ", e);
-        return ServerResponse.buildErrorResponse("Illegal arguments");
+        return ServerResponse.buildErrorResponse("非法参数");
     }
 
     @ExceptionHandler(NoAuthorityException.class)

@@ -19,6 +19,16 @@ public interface IFileService {
      */
     String upload(MultipartFile file);
 
+    /**
+     * 上传为文件
+     */
+    File uploadFile(MultipartFile file);
+
+    /**
+     * 创建一个
+     */
+    File createTmpEmptyDir();
+
     boolean writeStringToFile(String content, File targetFile);
 
     String getContentFromFile(File file);

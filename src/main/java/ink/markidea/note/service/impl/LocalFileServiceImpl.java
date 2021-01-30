@@ -30,6 +30,14 @@ public class LocalFileServiceImpl implements IFileService {
 
     @Override
     public String upload(MultipartFile sourceFile) {
+
+        File targetFile = uploadFile(sourceFile);
+
+        return DIR_PREFIX + getUsername() + "/" + targetFile.getName();
+    }
+
+    @Override
+    public File uploadFile(MultipartFile sourceFile) {
         String filename = sourceFile.getOriginalFilename();
 
         //获取扩展名
@@ -37,19 +45,16 @@ public class LocalFileServiceImpl implements IFileService {
         //防止可能上传同样文件名的文件 TODO
         String uploadFileName = UUID.randomUUID().toString()+"."+fileExtensionName;
         File userDir  = getOrInitUserFileDirectory();
-        log.info("开始上传文件，上传文件的文件名:{}，上传的路径:{}，新文件名:{}",filename,userDir.getAbsolutePath(),uploadFileName);
-
         File targetFile = new File(userDir, uploadFileName);
 
         //上传文件
         try {
             sourceFile.transferTo(targetFile);
         } catch (IOException e) {
-            log.error("上传文件异常",e);
-            return null;
+            throw new RuntimeException("upload file failed");
         }
 
-        return DIR_PREFIX + getUsername() + "/" + targetFile.getName();
+        return targetFile;
     }
 
     @Override
@@ -57,7 +62,10 @@ public class LocalFileServiceImpl implements IFileService {
         return FileUtil.writeStringToFile(content, targetFile);
     }
 
-
+    @Override
+    public File createTmpEmptyDir() {
+        return null;
+    }
 
     @Override
     public String getContentFromFile(File file){

@@ -1,6 +1,8 @@
 package ink.markidea.note.service;
 
 
+import ink.markidea.note.entity.dto.WebsiteConfigDto;
+import ink.markidea.note.entity.req.WebsiteConfigReq;
 import ink.markidea.note.entity.resp.ServerResponse;
 
 /**
@@ -24,4 +26,8 @@ public interface IAdminService {
     ServerResponse getRemoteRepoUrl();
 
     ServerResponse pullFromRemote();
+
+    boolean updateWebSiteConfig(WebsiteConfigReq req);
+
+    WebsiteConfigDto getWebsiteConfig();
 }

@@ -399,6 +399,14 @@ public class GitUtil {
         return getLocalGit(path) == null;
     }
 
+    public static  boolean checkGitDir(File file) {
+        try {
+            return Git.open(file) != null;
+        }catch (IOException e) {
+            return false;
+        }
+    }
+
     private static Git getLocalGit(String path) {
         File gitDirectory = new File(path);
         try {

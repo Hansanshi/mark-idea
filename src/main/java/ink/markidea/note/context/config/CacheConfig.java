@@ -1,9 +1,6 @@
 package ink.markidea.note.context.config;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.github.benmanes.caffeine.cache.Weigher;
+import com.github.benmanes.caffeine.cache.*;
 import ink.markidea.note.entity.ArticleDo;
 import ink.markidea.note.entity.dto.NotePreviewInfo;
 import ink.markidea.note.entity.dto.UserNoteKey;
@@ -28,6 +25,8 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class CacheConfig {
 
+    private static volatile int tokenExpireTimeInHour;
+
     @Autowired
     private IFileService fileService;
 
@@ -45,7 +44,22 @@ public class CacheConfig {
     public Cache<String, UserVo> userCache(){
         return Caffeine.newBuilder()
                         .maximumSize(500)
-                        .expireAfterAccess(2, TimeUnit.HOURS)
+                .expireAfter(new Expiry<String, UserVo>() {
+                    @Override
+                    public long expireAfterCreate(@NonNull String key, @NonNull UserVo value, long currentTime) {
+                        return System.currentTimeMillis() + tokenExpireTimeInHour * 3600 * 1000;
+                    }
+
+                    @Override
+                    public long expireAfterUpdate(@NonNull String key, @NonNull UserVo value, long currentTime, @NonNegative long currentDuration) {
+                        return System.currentTimeMillis() + tokenExpireTimeInHour * 3600 * 1000;
+                    }
+
+                    @Override
+                    public long expireAfterRead(@NonNull String key, @NonNull UserVo value, long currentTime, @NonNegative long currentDuration) {
+                        return System.currentTimeMillis() + tokenExpireTimeInHour * 3600 * 1000;
+                    }
+                })
                         .build();
     }
 
@@ -115,4 +129,9 @@ public class CacheConfig {
 
         return notebookName + "/" + noteTitle+".md";
     }
+
+    public static void setTokenExpireTimeInHour(int tokenExpireTimeInHour) {
+        CacheConfig.tokenExpireTimeInHour = tokenExpireTimeInHour;
+    }
+
 }
