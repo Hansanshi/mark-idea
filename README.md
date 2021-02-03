@@ -45,7 +45,7 @@ MarkIdea基于Git来管理笔记的历史版本，想必大家也比较熟悉这
 # <version> 替换下载文件名的版本号
 # <your_username>替换为你想要的用户名
 # <your_password>替换你想要的密码
-java -jar note-<version>.jar --username=<your_username> --password=<your_password>  2>&1 &
+java -jar note-<version>.jar --username=<your_username> --password=<your_password> 
 ```
 
 打开浏览器，访问`http://<server_ip>:8090`，即可开始使用，用户名和密码即`<your_username>`和`<your_password>`。
