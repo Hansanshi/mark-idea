@@ -28,6 +28,11 @@ public class EditorConfigDto {
     private boolean enableCounter = false;
 
     /**
+     * 默认打开大纲
+     */
+    private boolean enableOutline = false;
+
+    /**
      * 编辑模式
      * 支持sv, ir, wysiwyg
      */

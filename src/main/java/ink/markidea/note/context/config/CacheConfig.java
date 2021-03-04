@@ -12,10 +12,13 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 import java.io.File;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -23,9 +26,14 @@ import java.util.concurrent.TimeUnit;
  * @date 2020/2/17
  */
 @Configuration
-public class CacheConfig {
+public class CacheConfig implements EnvironmentAware {
 
+    /**
+     * token失效时间
+     */
     private static volatile int tokenExpireTimeInHour;
+
+    private static final long HOUR_DURATION_IN_NANO_SECONDS = 3600L * 1000L * 1000L;
 
     @Autowired
     private IFileService fileService;
@@ -47,20 +55,19 @@ public class CacheConfig {
                 .expireAfter(new Expiry<String, UserVo>() {
                     @Override
                     public long expireAfterCreate(@NonNull String key, @NonNull UserVo value, long currentTime) {
-                        return System.currentTimeMillis() + tokenExpireTimeInHour * 3600 * 1000;
+                        return currentTime + tokenExpireTimeInHour * HOUR_DURATION_IN_NANO_SECONDS;
                     }
 
                     @Override
                     public long expireAfterUpdate(@NonNull String key, @NonNull UserVo value, long currentTime, @NonNegative long currentDuration) {
-                        return System.currentTimeMillis() + tokenExpireTimeInHour * 3600 * 1000;
+                        return currentTime + tokenExpireTimeInHour * HOUR_DURATION_IN_NANO_SECONDS;
                     }
 
                     @Override
                     public long expireAfterRead(@NonNull String key, @NonNull UserVo value, long currentTime, @NonNegative long currentDuration) {
-                        return System.currentTimeMillis() + tokenExpireTimeInHour * 3600 * 1000;
+                        return currentTime + tokenExpireTimeInHour * HOUR_DURATION_IN_NANO_SECONDS;
                     }
-                })
-                        .build();
+                }).build();
     }
 
     @Bean("userNoteCache")
@@ -134,4 +141,8 @@ public class CacheConfig {
         CacheConfig.tokenExpireTimeInHour = tokenExpireTimeInHour;
     }
 
+    @Override
+    public void setEnvironment(Environment environment) {
+        tokenExpireTimeInHour = Objects.requireNonNull(environment.getProperty("tokenExpireTimeInHour", Integer.class));
+    }
 }

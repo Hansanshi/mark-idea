@@ -1,10 +1,12 @@
 package ink.markidea.note.service;
 
 
+import ink.markidea.note.entity.UserDo;
 import ink.markidea.note.entity.dto.EditorConfigDto;
 import ink.markidea.note.entity.req.EditorConfigReq;
 import ink.markidea.note.entity.resp.ServerResponse;
 import ink.markidea.note.entity.vo.UserVo;
+import org.springframework.data.domain.Page;
 
 /**
  * @author hansanshi
@@ -29,4 +31,6 @@ public interface IUserService {
     EditorConfigDto getEditorConfig();
 
     EditorConfigDto updateEditorConfig(EditorConfigReq req);
+
+    Page<UserVo> getUserList(Integer page, Integer size);
 }

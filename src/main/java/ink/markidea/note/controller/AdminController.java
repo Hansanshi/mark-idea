@@ -4,11 +4,14 @@ import ink.markidea.note.entity.dto.WebsiteConfigDto;
 import ink.markidea.note.entity.req.RemoteRepoRequest;
 import ink.markidea.note.entity.req.WebsiteConfigReq;
 import ink.markidea.note.entity.resp.ServerResponse;
+import ink.markidea.note.entity.vo.UserVo;
 import ink.markidea.note.service.IAdminService;
 import ink.markidea.note.service.IFileService;
 import ink.markidea.note.service.INoteService;
+import ink.markidea.note.service.IUserService;
 import ink.markidea.note.util.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,6 +28,9 @@ public class AdminController {
     @Autowired
     private IAdminService adminService;
 
+    @Autowired
+    private IUserService userService;
+
     @GetMapping("websiteConfig")
     public ServerResponse<WebsiteConfigDto> pullWebsiteConfig(){
         return ServerResponse.buildSuccessResponse(adminService.getWebsiteConfig());
@@ -35,4 +41,8 @@ public class AdminController {
         return adminService.updateWebSiteConfig(req) ? ServerResponse.buildSuccessResponse() : ServerResponse.buildErrorResponse("更新失败");
     }
 
+    @GetMapping("listUser")
+    public ServerResponse<Page<UserVo>> listUser(Integer page, Integer size) {
+        return ServerResponse.buildSuccessResponse(userService.getUserList(page, size));
+    }
 }

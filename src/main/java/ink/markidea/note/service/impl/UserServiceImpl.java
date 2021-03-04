@@ -18,6 +18,8 @@ import ink.markidea.note.util.ThreadLocalUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -164,4 +166,11 @@ public class UserServiceImpl implements IUserService {
         userRepository.save(userDo);
         return req;
     }
+
+    @Override
+    public Page<UserVo> getUserList(Integer page, Integer size) {
+        return userRepository.findAll(PageRequest.of(page, size)).map(userDo -> userDo.setPassword(null))
+                .map(userDo -> new UserVo().setUsername(userDo.getUsername()).setType(userDo.getStatus()));
+    }
+
 }
