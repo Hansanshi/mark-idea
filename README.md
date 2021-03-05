@@ -16,21 +16,30 @@ MarkIdea基于Git来管理笔记的历史版本，想必大家也比较熟悉这
 
 ![image-20200901190240696](https://gitee.com/hansanshi/image/raw/master/image-20200901190240696.png)
 
-输入用户名和密码即可登录或注册（可以选择关闭注册功能）。
+输入用户名和密码即可登录或注册（可以在网站管理页面选择打开或关闭注册功能）。
 
 ### 主页面
 
-![image-20200901190921203](https://gitee.com/hansanshi/image/raw/master/image-20200901190921203.png)
+![main](https://gitee.com/hansanshi/image/raw/master/20210203202244.png)
 
-主页面可以进行创建笔记本、新建笔记、移动笔记、搜索笔记和查看笔记历史等操作，点击左上角logo可以关闭或打开笔记侧边栏，右上角菜单可以选择进入设置页面或者注销登录。
+主页面可以进行创建笔记本、新建笔记、移动笔记、公开笔记、搜索笔记和查看笔记历史等操作，点击左上角logo可以关闭或打开笔记侧边栏，右上角菜单可以选择进入设置页面或者注销登录。
+
+笔记支持自动保存。
+
+使用vditor作为编辑器提供了强大而丰富的功能。
 
 ### 设置页面
 
-![image-20200901191516442](https://gitee.com/hansanshi/image/raw/master/2020-09-27-6.32.42.png)
+![20210203202714](https://gitee.com/hansanshi/image/raw/master/20210203202714.png)
 
-目前设置功能，主要是文件管理、修改密码和设置备份至远程仓库、公开笔记管理。
+目前设置功能，包括文件管理（查看、上传和删除）、修改密码和设置备份至远程仓库、公开笔记管理（查看和删除）和编辑器设置（自定义编辑器样式、是否代码高亮、字数统计等）。
 
-目前只在Firefox浏览器和Chrome浏览器上进行过测试，其他浏览器效果未知。
+### 网站管理
+
+![20210203202816](https://gitee.com/hansanshi/image/raw/master/20210203202816.png)
+
+目前支持自定义网站名称、登录有效时长、最大上传文件大小和是否开启注册功能，后续会进一步开放更多选项。
+
 
 ## 🔩 服务器部署
 
@@ -39,12 +48,10 @@ MarkIdea基于Git来管理笔记的历史版本，想必大家也比较熟悉这
 下载[软件](https://github.com/Hansanshi/mark-idea/releases)后，在该目录下进入命令行，运行下面一行命令
 
 ```bash
-# 后台运行MarkIdea
 # <version> 替换下载文件名的版本号
 # <your_username>替换为你想要的用户名
 # <your_password>替换你想要的密码
-# 如果想禁止注册，可以添加参数   --"register-forbidden"=true
-nohup java -jar note-<version>.jar --username=<your_username> --password=<your_password>  2>&1 &
+java -jar note-<version>.jar --username=<your_username> --password=<your_password> 
 ```
 
 打开浏览器，访问`http://<server_ip>:8090`，即可开始使用，用户名和密码即`<your_username>`和`<your_password>`。
@@ -116,17 +123,13 @@ nohup java -jar note-<version>.jar --username=<your_username> --password=<your_p
 
 2020.10.10 支持搜索功能
 
+2021.2.1 V0.4.4 UI优化、支持编辑器自定义设置和网站自定义设置
+
 ## 🤖 计划
 
-1. 导入
+1. 用户手册
 
-2. 用户编辑器可配置
-
-3. 远程仓库界面优化
-
-4. 用户手册
-
-5. 公开笔记聚合页
+2. 公开笔记聚合页
 
 
 
