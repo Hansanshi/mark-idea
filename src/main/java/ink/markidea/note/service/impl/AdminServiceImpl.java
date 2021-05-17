@@ -143,6 +143,10 @@ public class AdminServiceImpl implements IAdminService {
             return ;
         }
         File indexHtmlFile = new File(frontDir, "index.html");
+        if (!indexHtmlFile.exists()) {
+            // 支持前后端分离事 没有前端文件
+            return ;
+        }
         String indexHtmlStr  = FileUtil.readFileAsString(indexHtmlFile);
         String newIndexHtml = indexHtmlStr.replace("<title>" + originWebsiteConfig.getWebsiteTitle() + "</title>", "<title>" + req.getWebsiteTitle() + "</title>");
         FileUtil.writeStringToFile(newIndexHtml, indexHtmlFile);
