@@ -29,7 +29,6 @@ public class ArticleController {
 
     @GetMapping("")
     ServerResponse<Page<ArticleVo>> listArticles(Integer page, Integer size) {
-
         return ServerResponse.buildSuccessResponse(articleService.listArticles(page, size));
     }
 
@@ -62,5 +61,9 @@ public class ArticleController {
         return ServerResponse.buildSuccessResponse();
     }
 
+    @GetMapping("/{author}")
+    ServerResponse<Page<ArticleVo>> listUserArticles(@PathVariable String author, Integer pageIndex, Integer pageSize) {
+        return ServerResponse.buildSuccessResponse(articleService.listArticles(author, pageIndex, pageSize));
+    }
 
 }

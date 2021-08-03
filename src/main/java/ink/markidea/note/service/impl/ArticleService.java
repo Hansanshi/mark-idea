@@ -136,8 +136,10 @@ public class ArticleService implements IArticleService {
         if (articleDo == null) {
             return null;
         }
+        NotePreviewInfo previewInfo = userNotePreviewCache.get(buildUserNoteKey(articleDo.getNotebookName(), articleDo.getNoteTitle(), articleDo.getUsername()));
         return new ArticleVo().setArticleId(articleDo.getId())
                 .setNotebookName(articleDo.getNotebookName())
+                .setPreviewContent(previewInfo == null ? null : previewInfo.getPreviewContent())
                 .setNoteTitle(articleDo.getNoteTitle());
     }
 

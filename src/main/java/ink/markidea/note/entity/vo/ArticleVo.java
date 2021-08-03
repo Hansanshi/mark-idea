@@ -1,6 +1,5 @@
 package ink.markidea.note.entity.vo;
 
-import ink.markidea.note.entity.ArticleDo;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -23,4 +22,6 @@ public class ArticleVo  {
     private String noteTitle;
 
     private String content;
+
+    private String previewContent;
 }
