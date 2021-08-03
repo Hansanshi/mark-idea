@@ -113,6 +113,8 @@ java -jar note-<version>.jar --username=<your_username> --password=<your_passwor
 
 ## 🍉 更新记录
 
+2021.08.03 增加公开笔记侧栏（点击左上角）
+
 2021.04.09 修复登录时间设置bug、状态显示优化
 
 2021.01.09 大纲固定等
@@ -130,9 +132,6 @@ java -jar note-<version>.jar --username=<your_username> --password=<your_passwor
 ## 🤖 计划
 
 1. 用户手册
-
-2. 公开笔记聚合页
-
 
 
 
