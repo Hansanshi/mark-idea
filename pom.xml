@@ -10,7 +10,7 @@
     </parent>
     <groupId>ink.markidea</groupId>
     <artifactId>note</artifactId>
-    <version>0.4.5</version>
+    <version>0.4.6</version>
     <name>note</name>
     <description>MarkIdea, a note-taking software</description>
 
