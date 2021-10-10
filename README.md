@@ -133,6 +133,6 @@ java -jar note-<version>.jar --username=<your_username> --password=<your_passwor
 
 1. 用户手册
 
-
+2. 支持预览笔记历史版本内容
 
 
