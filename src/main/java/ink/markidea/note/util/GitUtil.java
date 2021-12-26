@@ -3,6 +3,7 @@ package ink.markidea.note.util;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import ink.markidea.note.entity.exception.PromptException;
 import ink.markidea.note.entity.vo.NoteVersionVo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,19 +17,28 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.diff.RawText;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
+import org.eclipse.jgit.patch.FileHeader;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevTree;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.*;
+import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.*;
 
+import static org.eclipse.jgit.diff.DiffEntry.Side.OLD;
 import static org.eclipse.jgit.lib.ConfigConstants.*;
 
 /**
@@ -268,6 +278,46 @@ public class GitUtil {
         return null;
     }
 
+    /**
+     * 获取文件某个历史版本的内容
+     * 实现不优雅  由于不清楚git原理
+     */
+    public static String getFileHistoryContent(Git git, String filePath, String ref) {
+        List<RevCommit> revCommitList = getVersionHistory(git, filePath);
+        String curRef = revCommitList.get(0).getName();
+        if (ref.equals(curRef)) {
+            throw new PromptException("当前版本无需预览");
+        }
+        Repository repository = git.getRepository();
+        try {
+            AbstractTreeIterator oldTreeParser = prepareTreeParser(repository, ref);
+            AbstractTreeIterator newTreeParser = prepareTreeParser(repository, curRef);
+            List<DiffEntry> diff = git.diff().
+                    setOldTree(oldTreeParser).
+                    setNewTree(newTreeParser).
+                    setPathFilter(PathFilter.create(filePath)).
+                    call();
+
+            for (DiffEntry entry : diff) {
+                try (DiffFormatter formatter = new DiffFormatter(System.out)) {
+                    formatter.setRepository(repository);
+                    Method method = DiffFormatter.class.getDeclaredMethod("open", DiffEntry.Side.class, DiffEntry.class);
+                    method.setAccessible(true);
+                    RawText rawText = (RawText) method.invoke(formatter, OLD, entry);
+                    return new String(rawText.getRawContent());
+                }
+            }
+            throw new RuntimeException();
+        } catch (Exception e) {
+            log.error("getHistory content error", e);
+            throw new IllegalArgumentException();
+        }
+    }
+
+    public static void main(String[] args) {
+        Git git = GitUtil.getOrInitGit("/Users/arthurlhan/Documents/GitHub/mark-idea");
+        System.out.println(GitUtil.getFileHistoryContent(git, "README.md", "07cc4db71ae5218267e221de351999fc5d5b1bc6"));
+    }
 
     /**
      * temporarily quit to complete the method
@@ -448,6 +498,24 @@ public class GitUtil {
             git.checkout().addPath(path).call();
         } catch (GitAPIException e) {
             e.printStackTrace();
+        }
+    }
+
+    private static AbstractTreeIterator prepareTreeParser(Repository repository, String objectId) throws IOException {
+        // from the commit we can build the tree which allows us to construct the TreeParser
+        //noinspection Duplicates
+        try (RevWalk walk = new RevWalk(repository)) {
+            RevCommit commit = walk.parseCommit(ObjectId.fromString(objectId));
+            RevTree tree = walk.parseTree(commit.getTree().getId());
+
+            CanonicalTreeParser treeParser = new CanonicalTreeParser();
+            try (ObjectReader reader = repository.newObjectReader()) {
+                treeParser.reset(reader, tree.getId());
+            }
+
+            walk.dispose();
+
+            return treeParser;
         }
     }
 

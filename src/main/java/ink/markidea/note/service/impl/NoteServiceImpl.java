@@ -293,6 +293,13 @@ public class NoteServiceImpl implements INoteService {
     }
 
     @Override
+    public ServerResponse<String> getNoteHistoryContent(String notebookName, String noteTitle, String versionRef) {
+        String relativeFileName = getRelativeFileName(notebookName,noteTitle);
+        String historyContent = GitUtil.getFileHistoryContent(getOrCreateUserGit(), relativeFileName, versionRef);
+        return ServerResponse.buildSuccessResponse(historyContent);
+    }
+
+    @Override
     public ServerResponse<String> resetAndGet(String notebookName, String noteTitle, String versionRef){
         String relativeFileName = getRelativeFileName(notebookName,noteTitle);
         boolean result = GitUtil.resetAndCommit(getOrCreateUserGit(),relativeFileName,versionRef);

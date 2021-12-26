@@ -67,6 +67,11 @@ public interface INoteService {
     ServerResponse<List<NoteVersionVo>> getNoteHistory(String notebookName, String noteTitle);
 
     /**
+     * get note content at a history version
+     */
+    ServerResponse<String> getNoteHistoryContent(String notebookName, String noteTitle, String versionRef);
+
+    /**
      * recover note to a certain version
      */
     ServerResponse<String> resetAndGet(String notebookName, String noteTitle, String versionRef);
